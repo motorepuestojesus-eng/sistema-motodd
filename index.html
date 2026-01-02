@@ -3,38 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventario y Facturación</title>
+    <title>Sistema Tienda Pro - Inventario y Clientes</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .form-group { margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .barcode-container { text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2, h3 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #eee; padding: 15px; border-radius: 5px; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1; min-width: 150px; }
+        button { padding: 8px 15px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 4px; }
+        button.view { background-color: #007bff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
         
-        /* Estilos para la impresión de factura */
+        #areaImpresion { display: none; }
+
         @media print {
             body * { visibility: hidden; }
-            #areaImpresion, #areaImpresion * { visibility: visible; }
-            #areaImpresion { position: absolute; left: 0; top: 0; width: 80mm; } /* Ajuste para impresora térmica */
+            #areaImpresion, #areaImpresion * { visibility: visible; display: block !important; }
+            #areaImpresion { position: absolute; left: 0; top: 0; width: 58mm; font-size: 12px; }
+            button { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <h2>Registro de Producto</h2>
+<div class="container">
+    <h2>📦 Registro de Inventario</h2>
     <div class="form-group">
-        <input type="text" id="modelo" placeholder="Modelo/Nombre">
-        <input type="number" id="precio" placeholder="Precio">
-        <input type="text" id="marca" placeholder="Proveedor/Marca">
-        <button onclick="agregarProducto()">Agregar y Generar Código</button>
+        <input type="text" id="modelo" placeholder="Modelo">
+        <input type="text" id="marca" placeholder="Marca/Proveedor">
+        <input type="number" id="precio" placeholder="Precio ($)">
+        <button onclick="agregarProducto()">Guardar Producto</button>
     </div>
 
     <table id="tablaProductos">
         <thead>
             <tr>
-                <th>Modelo</th>
-                <th>Marca</th>
+                <th>Modelo (Marca)</th>
                 <th>Precio</th>
                 <th>Código de Barras</th>
                 <th>Acción</th>
@@ -43,67 +50,114 @@
         <tbody></tbody>
     </table>
 
-    <hr>
+    <h2>👥 Clientes Recurrentes</h2>
+    <table id="tablaClientes">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Datos de Contacto</th>
+                <th>Historial</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
-    <div id="areaImpresion">
-        <h3>FACTURA DE VENTA</h3>
-        <p id="datosClienteFactura"></p>
-        <div id="detalleFactura"></div>
-        <p><strong>Total: $<span id="totalFactura">0</span></strong></p>
-    </div>
-    
-    <button onclick="window.print()">Imprimir Factura</button>
+<div id="areaImpresion">
+    <center>
+        <strong>MI TIENDA</strong><br>
+        Factura de Venta<br>
+        -------------------------
+    </center>
+    <p id="ticketFecha"></p>
+    <p id="ticketCliente"></p>
+    <div id="ticketDetalle"></div>
+    -------------------------<br>
+    <strong>TOTAL: $<span id="ticketTotal"></span></strong><br>
+    <center>¡Gracias por su compra!</center>
+</div>
 
-    <script>
-        let inventario = [];
+<script>
+    // Cargar datos al iniciar
+    let inventario = JSON.parse(localStorage.getItem('inventario')) || [];
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
 
-        function agregarProducto() {
-            const modelo = document.getElementById('modelo').value;
-            const precio = document.getElementById('precio').value;
-            const marca = document.getElementById('marca').value;
-            const idUnico = Date.now().toString().slice(-8); // Crea un código numérico basado en el tiempo
+    function guardarYRefrescar() {
+        localStorage.setItem('inventario', JSON.stringify(inventario));
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        renderizarTablas();
+    }
 
-            if(!modelo || !precio) return alert("Llena los campos");
+    function agregarProducto() {
+        const modelo = document.getElementById('modelo').value;
+        const marca = document.getElementById('marca').value;
+        const precio = document.getElementById('precio').value;
+        const idUnico = Date.now().toString().slice(-8);
 
-            const producto = { idUnico, modelo, precio, marca };
-            inventario.push(producto);
-            renderizarTabla();
+        if(!modelo || !precio) return alert("Complete los datos");
+
+        inventario.push({ idUnico, modelo, marca, precio });
+        guardarYRefrescar();
+    }
+
+    function realizarVenta(index) {
+        const prod = inventario[index];
+        const nombreCliente = prompt("Nombre del cliente (si ya existe, se actualizará su historial):");
+        if(!nombreCliente) return;
+
+        const infoContacto = prompt("Teléfono o ID del cliente:");
+        
+        // Buscar o Crear Cliente
+        let cliente = clientes.find(c => c.nombre.toLowerCase() === nombreCliente.toLowerCase());
+        if(!cliente) {
+            cliente = { nombre: nombreCliente, contacto: infoContacto, compras: [] };
+            clientes.push(cliente);
         }
+        
+        const fecha = new Date().toLocaleString();
+        cliente.compras.push(`${fecha}: ${prod.modelo} ($${prod.precio})`);
 
-        function renderizarTabla() {
-            const tbody = document.querySelector("#tablaProductos tbody");
-            tbody.innerHTML = "";
+        // Preparar Ticket
+        document.getElementById('ticketFecha').innerText = "Fecha: " + fecha;
+        document.getElementById('ticketCliente').innerText = "Cliente: " + cliente.nombre;
+        document.getElementById('ticketDetalle').innerText = `${prod.modelo} (${prod.marca}) - $${prod.precio}`;
+        document.getElementById('ticketTotal').innerText = prod.precio;
 
-            inventario.forEach((prod, index) => {
-                const fila = `<tr>
-                    <td>${prod.modelo}</td>
-                    <td>${prod.marca}</td>
-                    <td>$${prod.precio}</td>
-                    <td class="barcode-container"><svg id="barcode${index}"></svg></td>
-                    <td><button onclick="prepararFactura(${index})">Cobrar</button></td>
-                </tr>`;
-                tbody.innerHTML += fila;
-                
-                // Generar el código de barras después de crear el elemento SVG
-                setTimeout(() => {
-                    JsBarcode(`#barcode${index}`, prod.idUnico, {
-                        format: "CODE128",
-                        width: 1.5,
-                        height: 40,
-                        displayValue: true
-                    });
-                }, 10);
-            });
-        }
+        guardarYRefrescar();
+        window.print();
+    }
 
-        function prepararFactura(index) {
-            const cliente = prompt("Nombre del cliente:");
-            const prod = inventario[index];
-            document.getElementById('datosClienteFactura').innerText = "Cliente: " + cliente;
-            document.getElementById('detalleFactura').innerText = `${prod.modelo} - ${prod.marca}`;
-            document.getElementById('totalFactura').innerText = prod.precio;
-            alert("Listo para imprimir. Presiona el botón de imprimir.");
-        }
-    </script>
+    function renderizarTablas() {
+        // Render Inventario
+        const tbodyInv = document.querySelector("#tablaProductos tbody");
+        tbodyInv.innerHTML = "";
+        inventario.forEach((prod, i) => {
+            const fila = `<tr>
+                <td>${prod.modelo} (${prod.marca})</td>
+                <td>$${prod.precio}</td>
+                <td><svg id="barcode${i}"></svg></td>
+                <td><button onclick="realizarVenta(${i})">Vender/Imprimir</button></td>
+            </tr>`;
+            tbodyInv.innerHTML += fila;
+            setTimeout(() => {
+                JsBarcode(`#barcode${i}`, prod.idUnico, { format: "CODE128", width: 1.2, height: 30, displayValue: true });
+            }, 0);
+        });
+
+        // Render Clientes
+        const tbodyCli = document.querySelector("#tablaClientes tbody");
+        tbodyCli.innerHTML = "";
+        clientes.forEach(c => {
+            tbodyCli.innerHTML += `<tr>
+                <td>${c.nombre}</td>
+                <td>${c.contacto}</td>
+                <td style="font-size: 0.8em">${c.compras.slice(-3).join('<br>')}</td>
+            </tr>`;
+        });
+    }
+
+    renderizarTablas();
+</script>
+
 </body>
 </html>
