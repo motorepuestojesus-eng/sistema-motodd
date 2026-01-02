@@ -3,205 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MotoPro Ultra - Sistema de Inventario Masivo</title>
+    <title>ERP MotoPro - Gestión Integral</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        :root { --p: #004d40; --s: #00796b; --a: #ffc107; --d: #c62828; }
-        body { font-family: 'Segoe UI', Arial; background: #f0f2f5; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        :root { --p: #1a237e; --s: #0288d1; --a: #ff6f00; --bg: #f5f7fa; --text: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); display: flex; flex-direction: column; height: 100vh; }
         
-        /* Panel Superior: Divisas y Config */
-        .top-bar { background: var(--p); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-        .tasa-box { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 5px; border: 1px solid var(--a); }
+        /* Dashboard Header */
+        header { background: var(--p); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .nav-tabs { display: flex; background: #fff; padding: 10px; gap: 10px; border-bottom: 2px solid #ddd; }
+        .tab-btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; background: #eee; font-weight: bold; transition: 0.3s; }
+        .tab-btn.active { background: var(--s); color: white; }
 
-        .main-container { flex: 1; display: flex; padding: 15px; gap: 15px; overflow: hidden; }
+        .content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
+        .content.active { display: block; }
+
+        /* CRM & Ventas */
+        .grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         
-        /* Secciones */
-        .panel { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .panel-inv { flex: 3; } /* Más espacio al inventario */
-        .panel-cli { flex: 1.5; }
+        /* Inventario Masivo */
+        .search-box { width: 100%; padding: 12px; border: 2px solid var(--s); border-radius: 25px; margin-bottom: 15px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; background: white; font-size: 14px; }
+        th { background: #f1f1f1; padding: 12px; text-align: left; position: sticky; top: 0; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
 
-        .scroll { overflow-y: auto; flex: 1; padding: 10px; }
-        h3 { margin: 10px; color: var(--p); border-bottom: 2px solid #eee; }
-
-        /* Estilos de Tabla */
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { position: sticky; top: 0; background: var(--s); color: white; padding: 10px; z-index: 10; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
-        tr:hover { background: #f1f8e9; }
-
-        /* Inputs */
-        .form-group { padding: 15px; background: #fafafa; border-bottom: 1px solid #eee; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .full-w { grid-column: span 2; }
-        button { cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
-        .btn-add { background: var(--p); color: white; padding: 10px; }
+        /* Finanzas */
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { padding: 20px; border-radius: 8px; color: white; text-align: center; }
         
-        /* Impresión */
+        .btn-vender { background: #27ae60; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        
         @media print {
             body * { visibility: hidden; }
-            #ticketPrint, #ticketPrint * { visibility: visible; display: block !important; position: absolute; left: 0; top: 0; width: 58mm; }
+            #ticket, #ticket * { visibility: visible; display: block !important; position: absolute; left: 0; top: 0; width: 58mm; }
         }
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <span>🏍️ MOTO PRO ULTRA (100k+ Capacidad)</span>
-    <div class="tasa-box">
-        TASA BCV: <input type="number" id="tasa" value="36.50" step="0.01" onchange="render()" style="width: 70px; background: none; border: none; color: var(--a); font-weight: bold; font-size: 16px;"> Bs/$
+<header>
+    <div><strong>MOTO PRO ERP v3.0</strong> | Tasa: <input type="number" id="globalTasa" value="36.50" step="0.1" style="width:60px; background:none; color:white; border:1px solid #fff; border-radius:3px;"> Bs/$</div>
+    <div id="reloj"></div>
+</header>
+
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-ventas')">🛒 Ventas (POS)</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-inventario')">📦 Inventario</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-crm')">👥 CRM / Clientes</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-finanzas')">💰 Finanzas</button>
+</div>
+
+<div id="tab-ventas" class="content active">
+    <div class="grid-layout">
+        <div class="card">
+            <input type="text" id="posSearch" class="search-box" placeholder="Escanear Código o Buscar Repuesto..." onkeyup="buscarPOS()">
+            <div style="max-height: 500px; overflow-y: auto;">
+                <table id="posTable">
+                    <thead><tr><th>Repuesto</th><th>Marca</th><th>Stock</th><th>Precio</th><th>Acción</th></tr></thead>
+                    <tbody id="posBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Datos del Cliente</h3>
+            <input type="text" id="vCédula" placeholder="Cédula" onblur="autocompletarCliente(this.value)" style="width:100%; padding:8px; margin-bottom:10px;">
+            <input type="text" id="vNombre" placeholder="Nombre" style="width:100%; padding:8px; margin-bottom:10px;">
+            <input type="text" id="vMoto" placeholder="Moto / Modelo" style="width:100%; padding:8px; margin-bottom:10px;">
+            <div id="listaCompra" style="border-top:1px solid #ddd; margin-top:10px; padding-top:10px;">
+                <strong>Item:</strong> <span id="itemName">Ninguno</span><br>
+                <strong>Total:</strong> <span id="itemTotal">$0.00</span>
+            </div>
+            <button onclick="finalizarVenta()" style="width:100%; background:var(--p); color:white; padding:15px; margin-top:20px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">FACTURAR E IMPRIMIR</button>
+        </div>
     </div>
 </div>
 
-<div class="main-container">
-    <div class="panel panel-inv">
-        <h3>📦 Inventario y Carga</h3>
-        <div class="form-group">
-            <input type="text" id="p_marca" placeholder="Marca">
-            <input type="text" id="p_modelo" placeholder="Repuesto / Modelo">
-            <input type="number" id="p_precio" placeholder="Precio ($)">
-            <input type="number" id="p_stock" placeholder="Cantidad">
-            <button class="btn-add full-w" onclick="agregarProducto()">REGISTRAR EN SISTEMA</button>
+<div id="tab-inventario" class="content">
+    <div class="card">
+        <h3>Carga Masiva y Control de Stock</h3>
+        <div style="background:#f9f9f9; padding:15px; border-radius:5px; margin-bottom:20px;">
+            <input type="text" id="iMarca" placeholder="Marca">
+            <input type="text" id="iModelo" placeholder="Modelo">
+            <input type="number" id="iPrecio" placeholder="Precio $">
+            <input type="number" id="iStock" placeholder="Stock Inicial">
+            <button onclick="guardarNuevo()">Registrar</button>
         </div>
-        <input type="text" id="buscador" placeholder="🔍 Buscar por nombre, marca o código..." onkeyup="render()" style="margin: 10px; padding: 10px; border-radius: 20px; border: 2px solid var(--s);">
-        <div class="scroll">
-            <table>
-                <thead>
-                    <tr><th>Cód</th><th>Marca</th><th>Repuesto</th><th>Stock</th><th>Precio $</th><th>Precio Bs</th><th>Acción</th></tr>
-                </thead>
-                <tbody id="listaInv"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="panel panel-cli">
-        <h3>🛒 Punto de Venta</h3>
-        <div class="form-group">
-            <input type="text" id="c_cedula" placeholder="Cédula del Cliente" onkeyup="buscarCliente(this.value)" class="full-w" style="border: 2px solid var(--a);">
-            <input type="text" id="c_nombre" placeholder="Nombre Completo">
-            <input type="text" id="c_telf" placeholder="Teléfono">
-            <input type="text" id="c_moto" placeholder="Moto / Modelo" class="full-w">
-        </div>
-        <div id="ventaActiva" style="padding: 15px; background: #e0f2f1; margin: 10px; border-radius: 5px; display: none;">
-            <p id="v_detalle"></p>
-            <button onclick="confirmarVenta()" style="width: 100%; background: var(--s); color: white; padding: 15px;">IMPRIMIR FACTURA</button>
-        </div>
-        <h3 style="font-size: 14px;">👥 Clientes Registrados</h3>
-        <div class="scroll" id="listaClientes"></div>
+        <table id="invTable">
+            <thead><tr><th>Código</th><th>Marca</th><th>Modelo</th><th>Stock</th><th>USD</th><th>Acciones</th></tr></thead>
+            <tbody id="invBody"></tbody>
+        </table>
     </div>
 </div>
 
-<div id="ticketPrint" style="font-family: monospace; font-size: 12px;">
-    <center>
-        <strong>MOTO PRO REPUESTOS</strong><br>
-        Factura de Venta<br>
-        --------------------------
-    </center>
-    <p id="tf_cliente"></p>
-    <p id="tf_moto"></p>
+<div id="tab-crm" class="content">
+    <div class="card">
+        <h3>Historial de Clientes Potenciales y Post-Venta</h3>
+        <table id="crmTable">
+            <thead><tr><th>Cédula</th><th>Nombre</th><th>Moto</th><th>Última Compra</th><th>Estatus</th></tr></thead>
+            <tbody id="crmBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="tab-finanzas" class="content">
+    <div class="stat-grid">
+        <div class="stat-card" style="background: #2ecc71;">Ventas del Día<br><h2 id="fVentasDia">$0.00</h2></div>
+        <div class="stat-card" style="background: #3498db;">Efectivo en Bs<br><h2 id="fEfectivoBs">Bs 0.00</h2></div>
+        <div class="stat-card" style="background: #f1c40f;">Productos Vendidos<br><h2 id="fItemsVendidos">0</h2></div>
+    </div>
+    <div class="card">
+        <h3>Reporte de Transacciones</h3>
+        <table id="reporteTable">
+            <thead><tr><th>Fecha</th><th>Cliente</th><th>Total $</th><th>Total Bs</th></tr></thead>
+            <tbody id="reporteBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="ticket" style="font-family: monospace; font-size: 12px; width: 58mm;">
+    <center><strong>MOTOPRO REPUESTOS</strong><br>RIF: J-50000000-0</center>
     <hr>
-    <div id="tf_items"></div>
+    <div id="tContent"></div>
     <hr>
-    <p id="tf_total_usd"></p>
-    <p id="tf_total_bs"></p>
-    <center>Tasa: <span id="tf_tasa"></span><br>¡Gracias!</center>
+    <div id="tTotal"></div>
 </div>
 
 <script>
-    let inv = JSON.parse(localStorage.getItem('ultra_inv')) || [];
-    let cli = JSON.parse(localStorage.getItem('ultra_cli')) || [];
-    let ventaPendiente = null;
+    let productos = JSON.parse(localStorage.getItem('mp_prod')) || [];
+    let clientes = JSON.parse(localStorage.getItem('mp_cli')) || [];
+    let ventas = JSON.parse(localStorage.getItem('mp_ventas')) || [];
+    let itemActual = null;
 
-    function agregarProducto() {
-        const id = "R" + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-        const marca = document.getElementById('p_marca').value;
-        const modelo = document.getElementById('p_modelo').value;
-        const precio = document.getElementById('p_precio').value;
-        const stock = document.getElementById('p_stock').value;
-
-        if(!marca || !modelo || !precio) return alert("Datos incompletos");
-
-        inv.push({ id, marca, modelo, precio: parseFloat(precio), stock: parseInt(stock) });
-        save();
-    }
-
-    function buscarCliente(cedula) {
-        const c = cli.find(item => item.cedula === cedula);
-        if(c) {
-            document.getElementById('c_nombre').value = c.nombre;
-            document.getElementById('c_telf').value = c.telf;
-            document.getElementById('c_moto').value = c.moto;
-        }
-    }
-
-    function iniciarVenta(idx) {
-        ventaPendiente = inv[idx];
-        document.getElementById('ventaActiva').style.display = 'block';
-        document.getElementById('v_detalle').innerHTML = `VENDIENDO: <b>${ventaPendiente.modelo}</b><br>Precio: $${ventaPendiente.precio}`;
-    }
-
-    function confirmarVenta() {
-        const cedula = document.getElementById('c_cedula').value;
-        const nombre = document.getElementById('c_nombre').value;
-        const tasa = parseFloat(document.getElementById('tasa').value);
-
-        if(!cedula || !nombre) return alert("Datos del cliente requeridos");
-
-        // Guardar/Actualizar Cliente
-        let c = cli.find(item => item.cedula === cedula);
-        if(!c) {
-            c = { cedula, nombre, telf: document.getElementById('c_telf').value, moto: document.getElementById('c_moto').value };
-            cli.push(c);
-        }
-
-        // Procesar Stock
-        ventaPendiente.stock--;
-
-        // Llenar Ticket
-        document.getElementById('tf_cliente').innerText = "CLIENTE: " + nombre + " (" + cedula + ")";
-        document.getElementById('tf_moto').innerText = "MOTO: " + document.getElementById('c_moto').value;
-        document.getElementById('tf_items').innerText = ventaPendiente.modelo + " - $" + ventaPendiente.precio;
-        document.getElementById('tf_total_usd').innerText = "TOTAL USD: $" + ventaPendiente.precio;
-        document.getElementById('tf_total_bs').innerText = "TOTAL BS: " + (ventaPendiente.precio * tasa).toFixed(2);
-        document.getElementById('tf_tasa').innerText = tasa;
-
-        save();
-        window.print();
-        document.getElementById('ventaActiva').style.display = 'none';
-    }
-
-    function render() {
-        const q = document.getElementById('buscador').value.toLowerCase();
-        const tasa = parseFloat(document.getElementById('tasa').value);
-        const lInv = document.getElementById('listaInv');
-        lInv.innerHTML = "";
-
-        // Filtro rápido para alto rendimiento
-        const filtrados = inv.filter(p => p.modelo.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q) || p.id.includes(q));
-
-        filtrados.slice(0, 100).forEach((p, i) => { // Mostramos de 100 en 100 para no trabar
-            const precioBs = (p.precio * tasa).toFixed(2);
-            lInv.innerHTML += `<tr>
-                <td>${p.id}</td>
-                <td>${p.marca}</td>
-                <td>${p.modelo}</td>
-                <td style="color:${p.stock < 5 ? 'red':'black'}"><b>${p.stock}</b></td>
-                <td>$${p.precio}</td>
-                <td>Bs ${precioBs}</td>
-                <td><button onclick="iniciarVenta(${inv.indexOf(p)})" style="background:var(--s); color:white; padding:5px;">🛒</button></td>
-            </tr>`;
-        });
-
-        const lCli = document.getElementById('listaClientes');
-        lCli.innerHTML = cli.slice(-10).map(c => `<div style='font-size:11px; border-bottom:1px solid #eee; padding:5px;'>${c.nombre} (${c.cedula})</div>`).join("");
-    }
-
-    function save() {
-        localStorage.setItem('ultra_inv', JSON.stringify(inv));
-        localStorage.setItem('ultra_cli', JSON.stringify(cli));
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
         render();
     }
 
+    function guardarNuevo() {
+        const id = "M" + Date.now().toString().slice(-6);
+        productos.push({
+            id,
+            marca: document.getElementById('iMarca').value,
+            modelo: document.getElementById('iModelo').value,
+            precio: parseFloat(document.getElementById('iPrecio').value),
+            stock: parseInt(document.getElementById('iStock').value)
+        });
+        save();
+    }
+
+    function autocompletarCliente(cedula) {
+        const c = clientes.find(x => x.cedula === cedula);
+        if(c) {
+            document.getElementById('vNombre').value = c.nombre;
+            document.getElementById('vMoto').value = c.moto;
+        }
+    }
+
+    function buscarPOS() {
+        const q = document.getElementById('posSearch').value.toLowerCase();
+        const res = productos.filter(p => p.modelo.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
+        const body = document.getElementById('posBody');
+        body.innerHTML = res.slice(0,10).map(p => `
+            <tr>
+                <td>${p.modelo}</td><td>${p.marca}</td><td>${p.stock}</td><td>$${p.precio}</td>
+                <td><button class="btn-vender" onclick="seleccionarItem('${p.id}')">🛒</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function seleccionarItem(id) {
+        itemActual = productos.find(p => p.id === id);
+        document.getElementById('itemName').innerText = itemActual.modelo;
+        document.getElementById('itemTotal').innerText = "$" + itemActual.precio;
+    }
+
+    function finalizarVenta() {
+        if(!itemActual) return alert("Selecciona un producto");
+        const cedula = document.getElementById('vCédula').value;
+        const nombre = document.getElementById('vNombre').value;
+        const tasa = parseFloat(document.getElementById('globalTasa').value);
+
+        if(!cedula || !nombre) return alert("Datos de cliente incompletos");
+
+        // CRM: Registrar o actualizar cliente
+        let c = clientes.find(x => x.cedula === cedula);
+        if(!c) {
+            c = { cedula, nombre, moto: document.getElementById('vMoto').value, compras: 0 };
+            clientes.push(c);
+        }
+        c.compras++;
+
+        // Finanzas & Stock
+        itemActual.stock--;
+        const totalBs = (itemActual.precio * tasa).toFixed(2);
+        ventas.push({ fecha: new Date().toLocaleDateString(), cliente: nombre, total: itemActual.precio, totalBs });
+
+        // Imprimir Ticket
+        document.getElementById('tContent').innerHTML = `
+            Fecha: ${new Date().toLocaleString()}<br>
+            Cliente: ${nombre}<br>
+            Item: ${itemActual.modelo}
+        `;
+        document.getElementById('tTotal').innerHTML = `
+            Total USD: $${itemActual.precio}<br>
+            Total Bs: ${totalBs}<br>
+            Tasa: ${tasa}
+        `;
+
+        save();
+        window.print();
+        itemActual = null;
+    }
+
+    function save() {
+        localStorage.setItem('mp_prod', JSON.stringify(productos));
+        localStorage.setItem('mp_cli', JSON.stringify(clientes));
+        localStorage.setItem('mp_ventas', JSON.stringify(ventas));
+        render();
+    }
+
+    function render() {
+        // Renderizar Tablas
+        document.getElementById('invBody').innerHTML = productos.slice(-50).map(p => `
+            <tr><td>${p.id}</td><td>${p.marca}</td><td>${p.modelo}</td><td>${p.stock}</td><td>$${p.precio}</td><td><button onclick="imprimirCod('${p.id}')">🖨️</button></td></tr>
+        `).join('');
+
+        document.getElementById('crmBody').innerHTML = clientes.map(c => `
+            <tr><td>${c.cedula}</td><td>${c.nombre}</td><td>${c.moto}</td><td>Hoy</td><td>Recurrente</td></tr>
+        `).join('');
+
+        // Reporte Financiero
+        const totalDia = ventas.reduce((a, b) => a + b.total, 0);
+        const totalBs = ventas.reduce((a, b) => a + parseFloat(b.totalBs), 0);
+        document.getElementById('fVentasDia').innerText = "$" + totalDia.toFixed(2);
+        document.getElementById('fEfectivoBs').innerText = "Bs " + totalBs.toFixed(2);
+        document.getElementById('fItemsVendidos').innerText = ventas.length;
+    }
+
+    function imprimirCod(id) {
+        alert("Generando código de barras para: " + id);
+        // Aquí podrías reutilizar la lógica de etiquetas ya creada.
+    }
+
     render();
+    setInterval(() => document.getElementById('reloj').innerText = new Date().toLocaleString(), 1000);
 </script>
 </body>
 </html>
