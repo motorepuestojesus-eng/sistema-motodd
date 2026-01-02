@@ -3,266 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Tienda Pro - Inventario y Clientes</title>
+    <title>Sistema Contable - Tienda</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f4f9; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-        h2, h3 { color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-top: 30px; }
-        .form-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; background: #e9f7ef; padding: 20px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
-        input[type="text"], input[type="number"] { padding: 10px; border: 1px solid #a8dadc; border-radius: 5px; flex: 1; min-width: 120px; font-size: 1em; }
-        input[type="number"] { width: 80px; } /* Ajuste para campos numéricos */
-        button { padding: 10px 20px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; font-size: 1em; transition: background-color 0.3s ease; }
-        button:hover { background-color: #218838; }
-        button.print-barcode-btn { background-color: #007bff; margin-left: 5px; }
-        button.print-barcode-btn:hover { background-color: #0056b3; }
-        table { width: 100%; border-collapse: collapse; margin-top: 25px; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { border: 1px solid #e0e0e0; padding: 12px; text-align: left; vertical-align: middle; }
-        th { background-color: #f2f2f2; color: #555; font-weight: bold; }
-        tbody tr:nth-child(odd) { background-color: #fdfdfd; }
-        tbody tr:hover { background-color: #f5f5f5; }
-        .barcode-svg-container { text-align: center; padding: 5px; background-color: #f9f9f9; border-radius: 3px; }
-        .barcode-print-area { display: none; text-align: center; } /* Para imprimir solo el código de barras */
+        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --light: #ecf0f1; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         
-        #areaImpresion { display: none; } /* Ocultar por defecto para impresión de factura */
+        /* Sistema de Pestañas */
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--light); }
+        .tab-btn { padding: 12px 25px; border: none; background: var(--light); cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
+        /* Formularios y Tablas */
+        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: var(--light); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--accent); color: white; }
+        
+        /* Agrupación por Marca */
+        .marca-header { background: var(--secondary); color: white; padding: 10px; margin-top: 20px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f8f9fa; }
+
+        /* Impresión */
+        #areaImpresion, #barcodePrintArea { display: none; }
         @media print {
             body * { visibility: hidden; }
-            #areaImpresion, #areaImpresion * { visibility: visible; display: block !important; }
-            #areaImpresion { 
-                position: absolute; left: 0; top: 0; 
-                width: 58mm; /* Ancho típico de ticketera */
-                font-size: 12px; 
-                padding: 5mm; /* Espacio para el ticket */
-                box-sizing: border-box;
-            }
-            .no-print { display: none !important; } /* Oculta elementos que no se deben imprimir en el ticket */
-            .barcode-print-area { 
-                visibility: visible; 
-                display: block !important; 
-                position: absolute; 
-                left: 0; top: 0; 
-                width: 100%; 
-                text-align: center; 
-                padding: 10px; 
-            }
-            .barcode-print-area svg { width: 100%; height: auto; } /* Ajuste para el tamaño del código de barras */
+            #areaImpresion, #areaImpresion *, #barcodePrintArea, #barcodePrintArea * { visibility: visible; display: block !important; }
+            #areaImpresion { position: absolute; left: 0; top: 0; width: 58mm; font-size: 12px; }
+            #barcodePrintArea { position: absolute; left: 0; top: 0; width: 100%; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<div class="container no-print">
-    <h2>📦 Gestión de Inventario</h2>
-    <div class="form-group">
-        <input type="text" id="modelo" placeholder="Modelo/Descripción" required>
-        <input type="text" id="marca" placeholder="Marca/Proveedor" required>
-        <input type="number" id="precio" placeholder="Precio ($)" step="0.01" required>
-        <input type="number" id="unidades" placeholder="Unidades" min="1" required>
-        <button onclick="agregarProducto()">Agregar Producto</button>
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('inventario')">📦 Inventario</button>
+        <button class="tab-btn" onclick="showTab('clientes')">👥 Clientes</button>
     </div>
 
-    <h3>Productos en Stock</h3>
-    <table id="tablaProductos">
-        <thead>
-            <tr>
-                <th>Modelo (Marca)</th>
-                <th>Precio</th>
-                <th>Unidades</th>
-                <th>Código de Barras</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="inventario" class="tab-content active">
+        <h3>Agregar Nuevo Producto</h3>
+        <div class="form-group">
+            <input type="text" id="marca" placeholder="Marca (Proveedor)">
+            <input type="text" id="modelo" placeholder="Modelo/Producto">
+            <input type="number" id="precio" placeholder="Precio ($)">
+            <input type="number" id="unidades" placeholder="Cantidad">
+            <button class="btn-add" onclick="agregarProducto()">Guardar en Stock</button>
+        </div>
+        <div id="listaPorMarcas"></div>
+    </div>
 
-    <h2>👥 Clientes Recurrentes</h2>
-    <table id="tablaClientes">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Contacto</th>
-                <th>Últimas Compras</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="clientes" class="tab-content">
+        <h3>Base de Datos de Clientes</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Contacto</th>
+                    <th>Historial de Compras</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyClientes"></tbody>
+        </table>
+    </div>
 </div>
 
-<div id="barcodePrintContainer" class="barcode-print-area">
-    <svg id="individualBarcode"></svg>
-    <p id="barcodeLabel"></p>
-</div>
-
+<div id="barcodePrintArea"><svg id="svgBarcodePrint"></svg><p id="labelBarcodePrint"></p></div>
 <div id="areaImpresion">
-    <center>
-        <strong>MI TIENDA PRO</strong><br>
-        Factura de Venta<br>
-        -------------------------
-    </center>
-    <p>Fecha: <span id="ticketFecha"></span></p>
-    <p>Cliente: <span id="ticketCliente"></span></p>
-    <div id="ticketDetalle"></div>
-    -------------------------<br>
-    <strong>TOTAL: $<span id="ticketTotal"></span></strong><br>
-    <center>¡Gracias por su compra!</center>
+    <center><strong>FACTURA</strong></center>
+    <p id="tFecha"></p><p id="tCliente"></p>
+    <div id="tDetalle"></div>
+    <hr><strong>TOTAL: $<span id="tTotal"></span></strong>
 </div>
 
 <script>
-    // Cargar datos al iniciar
-    let inventario = JSON.parse(localStorage.getItem('inventario')) || [];
-    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    let inventario = JSON.parse(localStorage.getItem('inv_tienda')) || [];
+    let clientes = JSON.parse(localStorage.getItem('cli_tienda')) || [];
 
-    // Función para guardar en LocalStorage y renderizar las tablas
-    function guardarYRefrescar() {
-        localStorage.setItem('inventario', JSON.stringify(inventario));
-        localStorage.setItem('clientes', JSON.stringify(clientes));
-        renderizarTablas();
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+        renderizarTodo();
     }
 
-    // Agrega un nuevo producto al inventario
     function agregarProducto() {
-        const modelo = document.getElementById('modelo').value;
-        const marca = document.getElementById('marca').value;
-        const precio = parseFloat(document.getElementById('precio').value);
-        const unidades = parseInt(document.getElementById('unidades').value);
-        const idUnico = generarIdUnico(); // Genera un ID único para el código de barras
+        const marca = document.getElementById('marca').value.trim();
+        const modelo = document.getElementById('modelo').value.trim();
+        const precio = document.getElementById('precio').value;
+        const unidades = document.getElementById('unidades').value;
+        const idUnico = "P" + Date.now().toString().slice(-8);
 
-        if(!modelo || !marca || isNaN(precio) || isNaN(unidades) || unidades <= 0) {
-            return alert("Por favor, complete todos los campos correctamente.");
-        }
+        if(!marca || !modelo || !precio) return alert("Llena los campos");
 
-        inventario.push({ idUnico, modelo, marca, precio, unidades });
-        limpiarFormularioProducto();
-        guardarYRefrescar();
+        inventario.push({ idUnico, marca, modelo, precio, unidades });
+        localStorage.setItem('inv_tienda', JSON.stringify(inventario));
+        renderizarTodo();
     }
 
-    // Genera un ID único para el código de barras
-    function generarIdUnico() {
-        // Combina un timestamp con un número aleatorio para mayor unicidad
-        return Date.now().toString() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    }
-
-    // Limpia los campos del formulario de producto después de agregar
-    function limpiarFormularioProducto() {
-        document.getElementById('modelo').value = '';
-        document.getElementById('marca').value = '';
-        document.getElementById('precio').value = '';
-        document.getElementById('unidades').value = '';
-    }
-
-    // Realiza una venta, actualiza stock y registra al cliente
-    function realizarVenta(index) {
-        if (inventario[index].unidades <= 0) {
-            return alert("No hay unidades disponibles de este producto.");
-        }
-
-        const prod = inventario[index];
-        const cantidadAVender = parseInt(prompt(`¿Cuántas unidades de "${prod.modelo}" (${prod.marca}) desea vender? (Stock: ${prod.unidades})`, 1));
-
-        if (isNaN(cantidadAVender) || cantidadAVender <= 0 || cantidadAVender > prod.unidades) {
-            return alert("Cantidad de venta inválida o excede el stock.");
-        }
-
-        const nombreCliente = prompt("Nombre del cliente (si ya existe, se actualizará su historial):");
-        if(!nombreCliente) return;
-
-        const infoContacto = prompt("Teléfono o ID del cliente:");
+    function renderizarTodo() {
+        // Render Inventario Agrupado
+        const contenedor = document.getElementById('listaPorMarcas');
+        contenedor.innerHTML = "";
         
-        // Buscar o Crear Cliente
-        let cliente = clientes.find(c => c.nombre.toLowerCase() === nombreCliente.toLowerCase());
-        if(!cliente) {
-            cliente = { nombre: nombreCliente, contacto: infoContacto, compras: [] };
-            clientes.push(cliente);
-        }
-        
-        const fecha = new Date().toLocaleString();
-        const totalVenta = prod.precio * cantidadAVender;
-        cliente.compras.push(`${fecha}: ${cantidadAVender}x ${prod.modelo} ($${totalVenta.toFixed(2)})`);
+        const marcas = [...new Set(inventario.map(p => p.marca))];
+        marcas.forEach(m => {
+            const seccion = document.createElement('div');
+            seccion.innerHTML = `<div class="marca-header">MARCA: ${m.toUpperCase()}</div>`;
+            const tabla = document.createElement('table');
+            tabla.innerHTML = `<thead><tr><th>Modelo</th><th>Precio</th><th>Stock</th><th>Barcode</th><th>Acción</th></tr></thead>`;
+            const tbody = document.createElement('tbody');
 
-        // Actualizar stock
-        inventario[index].unidades -= cantidadAVender;
-
-        // Preparar Ticket
-        document.getElementById('ticketFecha').innerText = fecha;
-        document.getElementById('ticketCliente').innerText = cliente.nombre;
-        document.getElementById('ticketDetalle').innerHTML = `
-            ${cantidadAVender}x ${prod.modelo} (${prod.marca}) @ $${prod.precio.toFixed(2)} c/u<br>
-            Subtotal: $${totalVenta.toFixed(2)}
-        `;
-        document.getElementById('ticketTotal').innerText = totalVenta.toFixed(2);
-
-        guardarYRefrescar();
-        window.print(); // Imprime la factura
-    }
-
-    // Imprime un código de barras individual
-    function imprimirCodigoBarras(idProducto, modelo, marca) {
-        document.querySelector('.container').classList.add('no-print'); // Oculta el resto de la interfaz
-        const barcodeContainer = document.getElementById('barcodePrintContainer');
-        barcodeContainer.style.display = 'block'; // Muestra el contenedor de impresión del código de barras
-
-        // Genera el código de barras en el contenedor temporal
-        JsBarcode("#individualBarcode", idProducto, { 
-            format: "CODE128", 
-            width: 2, // Más ancho para mejor lectura
-            height: 60, // Más alto
-            displayValue: true 
-        });
-        document.getElementById('barcodeLabel').innerText = `${modelo} (${marca})`;
-
-        window.print(); // Imprime
-
-        // Volver a ocultar y mostrar la interfaz principal después de la impresión
-        setTimeout(() => {
-            barcodeContainer.style.display = 'none';
-            document.querySelector('.container').classList.remove('no-print');
-        }, 500); // Pequeño retraso para asegurar que la impresión se activa
-    }
-
-    // Renderiza las tablas de inventario y clientes
-    function renderizarTablas() {
-        // Render Inventario
-        const tbodyInv = document.querySelector("#tablaProductos tbody");
-        tbodyInv.innerHTML = "";
-        inventario.forEach((prod, i) => {
-            const fila = `<tr>
-                <td>${prod.modelo} (${prod.marca})</td>
-                <td>$${prod.precio.toFixed(2)}</td>
-                <td>${prod.unidades}</td>
-                <td class="barcode-svg-container"><svg id="barcodeInv${i}"></svg></td>
-                <td>
-                    <button onclick="realizarVenta(${i})">Vender</button>
-                    <button class="print-barcode-btn" onclick="imprimirCodigoBarras('${prod.idUnico}', '${prod.modelo}', '${prod.marca}')">Imprimir CB</button>
-                </td>
-            </tr>`;
-            tbodyInv.innerHTML += fila;
-            // Generar el código de barras después de que el elemento SVG esté en el DOM
-            setTimeout(() => {
-                JsBarcode(`#barcodeInv${i}`, prod.idUnico, { 
-                    format: "CODE128", 
-                    width: 1.2, 
-                    height: 30, 
-                    displayValue: false // No mostrar el número debajo para la tabla
-                });
-            }, 0);
+            inventario.filter(p => p.marca === m).forEach((p, idx) => {
+                const fila = `<tr>
+                    <td>${p.modelo}</td>
+                    <td>$${p.precio}</td>
+                    <td>${p.unidades}</td>
+                    <td><svg id="bc${p.idUnico}"></svg></td>
+                    <td>
+                        <button onclick="vender('${p.idUnico}')">Vender</button>
+                        <button onclick="imprimirBarras('${p.idUnico}', '${p.modelo}')">Etiqueta</button>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += fila;
+                setTimeout(() => JsBarcode(`#bc${p.idUnico}`, p.idUnico, {height: 25, width: 1.2, fontSize: 10}), 0);
+            });
+            tabla.appendChild(tbody);
+            seccion.appendChild(tabla);
+            contenedor.appendChild(seccion);
         });
 
         // Render Clientes
-        const tbodyCli = document.querySelector("#tablaClientes tbody");
+        const tbodyCli = document.getElementById('tbodyClientes');
         tbodyCli.innerHTML = "";
         clientes.forEach(c => {
-            tbodyCli.innerHTML += `<tr>
-                <td>${c.nombre}</td>
-                <td>${c.contacto || 'N/A'}</td>
-                <td style="font-size: 0.8em">${c.compras.slice(-3).join('<br>')}</td>
-            </tr>`;
+            tbodyCli.innerHTML += `<tr><td>${c.nombre}</td><td>${c.contacto}</td><td>${c.compras.join('<br>')}</td></tr>`;
         });
     }
 
-    // Inicializa las tablas al cargar la página
-    renderizarTablas();
-</script>
+    function vender(id) {
+        const p = inventario.find(i => i.idUnico === id);
+        const nombre = prompt("Nombre del cliente:");
+        if(!nombre) return;
 
+        let cli = clientes.find(c => c.nombre === nombre);
+        if(!cli) { cli = { nombre, contacto: prompt("Contacto:"), compras: [] }; clientes.push(cli); }
+        
+        const fecha = new Date().toLocaleDateString();
+        cli.compras.push(`${fecha} - ${p.modelo} ($${p.precio})`);
+        p.unidades--;
+
+        document.getElementById('tFecha').innerText = fecha;
+        document.getElementById('tCliente').innerText = "Cliente: " + nombre;
+        document.getElementById('tDetalle').innerText = p.modelo;
+        document.getElementById('tTotal').innerText = p.precio;
+
+        localStorage.setItem('inv_tienda', JSON.stringify(inventario));
+        localStorage.setItem('cli_tienda', JSON.stringify(clientes));
+        renderizarTodo();
+        window.print();
+    }
+
+    function imprimirBarras(id, mod) {
+        JsBarcode("#svgBarcodePrint", id);
+        document.getElementById('labelBarcodePrint').innerText = mod;
+        window.print();
+    }
+
+    renderizarTodo();
+</script>
 </body>
 </html>
