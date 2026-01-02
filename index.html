@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario y Facturación</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .barcode-container { text-align: center; }
+        
+        /* Estilos para la impresión de factura */
+        @media print {
+            body * { visibility: hidden; }
+            #areaImpresion, #areaImpresion * { visibility: visible; }
+            #areaImpresion { position: absolute; left: 0; top: 0; width: 80mm; } /* Ajuste para impresora térmica */
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Registro de Producto</h2>
+    <div class="form-group">
+        <input type="text" id="modelo" placeholder="Modelo/Nombre">
+        <input type="number" id="precio" placeholder="Precio">
+        <input type="text" id="marca" placeholder="Proveedor/Marca">
+        <button onclick="agregarProducto()">Agregar y Generar Código</button>
+    </div>
+
+    <table id="tablaProductos">
+        <thead>
+            <tr>
+                <th>Modelo</th>
+                <th>Marca</th>
+                <th>Precio</th>
+                <th>Código de Barras</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <hr>
+
+    <div id="areaImpresion">
+        <h3>FACTURA DE VENTA</h3>
+        <p id="datosClienteFactura"></p>
+        <div id="detalleFactura"></div>
+        <p><strong>Total: $<span id="totalFactura">0</span></strong></p>
+    </div>
+    
+    <button onclick="window.print()">Imprimir Factura</button>
+
+    <script>
+        let inventario = [];
+
+        function agregarProducto() {
+            const modelo = document.getElementById('modelo').value;
+            const precio = document.getElementById('precio').value;
+            const marca = document.getElementById('marca').value;
+            const idUnico = Date.now().toString().slice(-8); // Crea un código numérico basado en el tiempo
+
+            if(!modelo || !precio) return alert("Llena los campos");
+
+            const producto = { idUnico, modelo, precio, marca };
+            inventario.push(producto);
+            renderizarTabla();
+        }
+
+        function renderizarTabla() {
+            const tbody = document.querySelector("#tablaProductos tbody");
+            tbody.innerHTML = "";
+
+            inventario.forEach((prod, index) => {
+                const fila = `<tr>
+                    <td>${prod.modelo}</td>
+                    <td>${prod.marca}</td>
+                    <td>$${prod.precio}</td>
+                    <td class="barcode-container"><svg id="barcode${index}"></svg></td>
+                    <td><button onclick="prepararFactura(${index})">Cobrar</button></td>
+                </tr>`;
+                tbody.innerHTML += fila;
+                
+                // Generar el código de barras después de crear el elemento SVG
+                setTimeout(() => {
+                    JsBarcode(`#barcode${index}`, prod.idUnico, {
+                        format: "CODE128",
+                        width: 1.5,
+                        height: 40,
+                        displayValue: true
+                    });
+                }, 10);
+            });
+        }
+
+        function prepararFactura(index) {
+            const cliente = prompt("Nombre del cliente:");
+            const prod = inventario[index];
+            document.getElementById('datosClienteFactura').innerText = "Cliente: " + cliente;
+            document.getElementById('detalleFactura').innerText = `${prod.modelo} - ${prod.marca}`;
+            document.getElementById('totalFactura').innerText = prod.precio;
+            alert("Listo para imprimir. Presiona el botón de imprimir.");
+        }
+    </script>
+</body>
+</html>
