@@ -3,209 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Repuestos MotoPro - Escáner Activo</title>
+    <title>MotoPro Ultra - Sistema de Inventario Masivo</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        :root { --dark: #1a1a1a; --blue: #2980b9; --green: #27ae60; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        :root { --p: #004d40; --s: #00796b; --a: #ffc107; --d: #c62828; }
+        body { font-family: 'Segoe UI', Arial; background: #f0f2f5; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        /* Indicador de Escáner */
-        .scanner-status { background: #e8f4fd; border-left: 5px solid var(--blue); padding: 10px; margin-bottom: 20px; font-weight: bold; display: flex; justify-content: space-between; }
-        
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; background: #ddd; font-weight: bold; }
-        .tab-btn.active { background: var(--dark); color: white; }
+        /* Panel Superior: Divisas y Config */
+        .top-bar { background: var(--p); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .tasa-box { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 5px; border: 1px solid var(--a); }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #eee; padding: 15px; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: var(--blue); color: white; }
+        .main-container { flex: 1; display: flex; padding: 15px; gap: 15px; overflow: hidden; }
         
-        .stock-alert { color: var(--danger); font-weight: bold; background: #ffeeee; }
+        /* Secciones */
+        .panel { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .panel-inv { flex: 3; } /* Más espacio al inventario */
+        .panel-cli { flex: 1.5; }
 
-        /* Estilos de Impresión */
-        #ticketFactura, #etiquetaUnica { display: none; }
+        .scroll { overflow-y: auto; flex: 1; padding: 10px; }
+        h3 { margin: 10px; color: var(--p); border-bottom: 2px solid #eee; }
+
+        /* Estilos de Tabla */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { position: sticky; top: 0; background: var(--s); color: white; padding: 10px; z-index: 10; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f1f8e9; }
+
+        /* Inputs */
+        .form-group { padding: 15px; background: #fafafa; border-bottom: 1px solid #eee; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .full-w { grid-column: span 2; }
+        button { cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-add { background: var(--p); color: white; padding: 10px; }
+        
+        /* Impresión */
         @media print {
             body * { visibility: hidden; }
-            #ticketFactura, #ticketFactura * { visibility: visible; display: block !important; position: absolute; left: 0; top: 0; width: 58mm; }
-            #etiquetaUnica, #etiquetaUnica * { visibility: visible; display: block !important; position: absolute; left: 0; top: 0; width: 40mm; text-align: center; }
+            #ticketPrint, #ticketPrint * { visibility: visible; display: block !important; position: absolute; left: 0; top: 0; width: 58mm; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="scanner-status">
-        <span>🔌 MODO ESCÁNER ACTIVO: Pase el producto por el lector en cualquier momento</span>
-        <span id="lastScan" style="color: var(--green);">Último escaneo: Ninguno</span>
+<div class="top-bar">
+    <span>🏍️ MOTO PRO ULTRA (100k+ Capacidad)</span>
+    <div class="tasa-box">
+        TASA BCV: <input type="number" id="tasa" value="36.50" step="0.01" onchange="render()" style="width: 70px; background: none; border: none; color: var(--a); font-weight: bold; font-size: 16px;"> Bs/$
     </div>
+</div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('inventario')">📦 INVENTARIO (1000+)</button>
-        <button class="tab-btn" onclick="showTab('clientes')">👥 CLIENTES Y PAGOS</button>
-    </div>
-
-    <div id="inventario" class="tab-content">
-        <div class="form-grid">
-            <input type="text" id="m_marca" placeholder="Marca">
-            <input type="text" id="m_modelo" placeholder="Repuesto">
-            <input type="number" id="m_precio" placeholder="Precio $">
-            <input type="number" id="m_unidades" placeholder="Stock">
-            <button onclick="agregar()" style="background:var(--green); color:white; border:none; cursor:pointer;">REGISTRAR</button>
+<div class="main-container">
+    <div class="panel panel-inv">
+        <h3>📦 Inventario y Carga</h3>
+        <div class="form-group">
+            <input type="text" id="p_marca" placeholder="Marca">
+            <input type="text" id="p_modelo" placeholder="Repuesto / Modelo">
+            <input type="number" id="p_precio" placeholder="Precio ($)">
+            <input type="number" id="p_stock" placeholder="Cantidad">
+            <button class="btn-add full-w" onclick="agregarProducto()">REGISTRAR EN SISTEMA</button>
         </div>
-        
-        <input type="text" id="buscador" placeholder="🔍 Buscar manualmente..." onkeyup="render()" style="width:98%; padding:10px; margin-top:15px; border:2px solid #ddd;">
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Marca</th>
-                    <th>Repuesto</th>
-                    <th>Stock</th>
-                    <th>Precio</th>
-                    <th>Código</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="listaInv"></tbody>
-        </table>
+        <input type="text" id="buscador" placeholder="🔍 Buscar por nombre, marca o código..." onkeyup="render()" style="margin: 10px; padding: 10px; border-radius: 20px; border: 2px solid var(--s);">
+        <div class="scroll">
+            <table>
+                <thead>
+                    <tr><th>Cód</th><th>Marca</th><th>Repuesto</th><th>Stock</th><th>Precio $</th><th>Precio Bs</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="listaInv"></tbody>
+            </table>
+        </div>
     </div>
 
-    <div id="clientes" class="tab-content" style="display:none;">
-        <table id="tablaCli">
-            <thead><tr><th>Cliente</th><th>Moto</th><th>Última Compra</th></tr></thead>
-            <tbody id="listaCli"></tbody>
-        </table>
+    <div class="panel panel-cli">
+        <h3>🛒 Punto de Venta</h3>
+        <div class="form-group">
+            <input type="text" id="c_cedula" placeholder="Cédula del Cliente" onkeyup="buscarCliente(this.value)" class="full-w" style="border: 2px solid var(--a);">
+            <input type="text" id="c_nombre" placeholder="Nombre Completo">
+            <input type="text" id="c_telf" placeholder="Teléfono">
+            <input type="text" id="c_moto" placeholder="Moto / Modelo" class="full-w">
+        </div>
+        <div id="ventaActiva" style="padding: 15px; background: #e0f2f1; margin: 10px; border-radius: 5px; display: none;">
+            <p id="v_detalle"></p>
+            <button onclick="confirmarVenta()" style="width: 100%; background: var(--s); color: white; padding: 15px;">IMPRIMIR FACTURA</button>
+        </div>
+        <h3 style="font-size: 14px;">👥 Clientes Registrados</h3>
+        <div class="scroll" id="listaClientes"></div>
     </div>
 </div>
 
-<div id="etiquetaUnica">
-    <div id="labelNombre" style="font-size: 10px; font-weight: bold;"></div>
-    <svg id="barcodeEtiqueta"></svg>
-</div>
-
-<div id="ticketFactura">
-    <center><strong>REPUESTOS MOTO-PRO</strong><br>FACTURA DE VENTA</center>
+<div id="ticketPrint" style="font-family: monospace; font-size: 12px;">
+    <center>
+        <strong>MOTO PRO REPUESTOS</strong><br>
+        Factura de Venta<br>
+        --------------------------
+    </center>
+    <p id="tf_cliente"></p>
+    <p id="tf_moto"></p>
     <hr>
-    <p id="fFecha"></p>
-    <p id="fCliente"></p>
-    <div id="fDetalle"></div>
+    <div id="tf_items"></div>
     <hr>
-    <strong>TOTAL: $<span id="fTotal"></span></strong>
+    <p id="tf_total_usd"></p>
+    <p id="tf_total_bs"></p>
+    <center>Tasa: <span id="tf_tasa"></span><br>¡Gracias!</center>
 </div>
 
 <script>
-    let inv = JSON.parse(localStorage.getItem('m_inv')) || [];
-    let cli = JSON.parse(localStorage.getItem('m_cli')) || [];
-    let barcodeBuffer = "";
+    let inv = JSON.parse(localStorage.getItem('ultra_inv')) || [];
+    let cli = JSON.parse(localStorage.getItem('ultra_cli')) || [];
+    let ventaPendiente = null;
 
-    // --- LÓGICA DEL ESCÁNER ---
-    // El escáner actúa como un teclado rápido. Capturamos los números y al presionar "Enter" busca el producto.
-    window.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            procesarEscaneo(barcodeBuffer);
-            barcodeBuffer = "";
-        } else {
-            barcodeBuffer += e.key;
-        }
-    });
+    function agregarProducto() {
+        const id = "R" + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+        const marca = document.getElementById('p_marca').value;
+        const modelo = document.getElementById('p_modelo').value;
+        const precio = document.getElementById('p_precio').value;
+        const stock = document.getElementById('p_stock').value;
 
-    function procesarEscaneo(codigo) {
-        const p = inv.find(item => item.id === codigo.trim());
-        if (p) {
-            document.getElementById('lastScan').innerText = "Último escaneo: " + p.modelo;
-            vender(inv.indexOf(p));
-        } else {
-            console.log("Código no registrado: " + codigo);
-        }
-    }
+        if(!marca || !modelo || !precio) return alert("Datos incompletos");
 
-    // --- FUNCIONES CORE ---
-    function agregar() {
-        const id = "M" + Math.floor(10000000 + Math.random() * 90000000); // ID numérico largo para el escáner
-        const marca = document.getElementById('m_marca').value;
-        const modelo = document.getElementById('m_modelo').value;
-        const precio = document.getElementById('m_precio').value;
-        const unidades = document.getElementById('m_unidades').value;
-
-        if(!marca || !modelo) return alert("Completa los datos");
-        inv.push({ id, marca, modelo, precio, unidades });
+        inv.push({ id, marca, modelo, precio: parseFloat(precio), stock: parseInt(stock) });
         save();
     }
 
-    function vender(idx) {
-        const p = inv[idx];
-        if(p.unidades <= 0) return alert("¡SIN STOCK!");
+    function buscarCliente(cedula) {
+        const c = cli.find(item => item.cedula === cedula);
+        if(c) {
+            document.getElementById('c_nombre').value = c.nombre;
+            document.getElementById('c_telf').value = c.telf;
+            document.getElementById('c_moto').value = c.moto;
+        }
+    }
 
-        const nombre = prompt("Nombre del Cliente:", "Consumidor Final");
-        let c = cli.find(x => x.nombre === nombre);
-        if(!c) { 
-            c = { nombre, moto: prompt("Moto/Modelo:"), historial: [] };
+    function iniciarVenta(idx) {
+        ventaPendiente = inv[idx];
+        document.getElementById('ventaActiva').style.display = 'block';
+        document.getElementById('v_detalle').innerHTML = `VENDIENDO: <b>${ventaPendiente.modelo}</b><br>Precio: $${ventaPendiente.precio}`;
+    }
+
+    function confirmarVenta() {
+        const cedula = document.getElementById('c_cedula').value;
+        const nombre = document.getElementById('c_nombre').value;
+        const tasa = parseFloat(document.getElementById('tasa').value);
+
+        if(!cedula || !nombre) return alert("Datos del cliente requeridos");
+
+        // Guardar/Actualizar Cliente
+        let c = cli.find(item => item.cedula === cedula);
+        if(!c) {
+            c = { cedula, nombre, telf: document.getElementById('c_telf').value, moto: document.getElementById('c_moto').value };
             cli.push(c);
         }
 
-        p.unidades--;
-        const fecha = new Date().toLocaleString();
-        c.historial.push(`${fecha} - ${p.modelo}`);
+        // Procesar Stock
+        ventaPendiente.stock--;
 
-        // Preparar Factura
-        document.getElementById('fFecha').innerText = "Fecha: " + fecha;
-        document.getElementById('fCliente').innerText = "Cliente: " + nombre;
-        document.getElementById('fDetalle').innerText = `${p.modelo} (${p.marca}) - $${p.precio}`;
-        document.getElementById('fTotal').innerText = p.precio;
+        // Llenar Ticket
+        document.getElementById('tf_cliente').innerText = "CLIENTE: " + nombre + " (" + cedula + ")";
+        document.getElementById('tf_moto').innerText = "MOTO: " + document.getElementById('c_moto').value;
+        document.getElementById('tf_items').innerText = ventaPendiente.modelo + " - $" + ventaPendiente.precio;
+        document.getElementById('tf_total_usd').innerText = "TOTAL USD: $" + ventaPendiente.precio;
+        document.getElementById('tf_total_bs').innerText = "TOTAL BS: " + (ventaPendiente.precio * tasa).toFixed(2);
+        document.getElementById('tf_tasa').innerText = tasa;
 
         save();
-        window.print(); // Imprime factura
-    }
-
-    function imprimirEtiqueta(idx) {
-        const p = inv[idx];
-        document.getElementById('labelNombre').innerText = p.modelo + " - " + p.marca;
-        JsBarcode("#barcodeEtiqueta", p.id, { height: 40, width: 2, fontSize: 12 });
-        window.print(); // Imprime la etiqueta para pegar
-    }
-
-    function save() {
-        localStorage.setItem('m_inv', JSON.stringify(inv));
-        localStorage.setItem('m_cli', JSON.stringify(cli));
-        render();
+        window.print();
+        document.getElementById('ventaActiva').style.display = 'none';
     }
 
     function render() {
-        const query = document.getElementById('buscador').value.toLowerCase();
-        const lista = document.getElementById('listaInv');
-        lista.innerHTML = "";
+        const q = document.getElementById('buscador').value.toLowerCase();
+        const tasa = parseFloat(document.getElementById('tasa').value);
+        const lInv = document.getElementById('listaInv');
+        lInv.innerHTML = "";
 
-        inv.forEach((p, i) => {
-            if(p.modelo.toLowerCase().includes(query) || p.marca.toLowerCase().includes(query) || p.id.includes(query)) {
-                const alertClass = p.unidades < 3 ? 'stock-alert' : '';
-                lista.innerHTML += `<tr class="${alertClass}">
-                    <td>${p.marca}</td>
-                    <td>${p.modelo}</td>
-                    <td>${p.unidades}</td>
-                    <td>$${p.precio}</td>
-                    <td>${p.id}</td>
-                    <td>
-                        <button onclick="vender(${i})" style="background:var(--green); color:white; border:none; padding:5px; border-radius:3px; cursor:pointer;">VENDER</button>
-                        <button onclick="imprimirEtiqueta(${i})" style="background:var(--blue); color:white; border:none; padding:5px; border-radius:3px; cursor:pointer;">IMPRIMIR ETIQUETA</button>
-                    </td>
-                </tr>`;
-            }
+        // Filtro rápido para alto rendimiento
+        const filtrados = inv.filter(p => p.modelo.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q) || p.id.includes(q));
+
+        filtrados.slice(0, 100).forEach((p, i) => { // Mostramos de 100 en 100 para no trabar
+            const precioBs = (p.precio * tasa).toFixed(2);
+            lInv.innerHTML += `<tr>
+                <td>${p.id}</td>
+                <td>${p.marca}</td>
+                <td>${p.modelo}</td>
+                <td style="color:${p.stock < 5 ? 'red':'black'}"><b>${p.stock}</b></td>
+                <td>$${p.precio}</td>
+                <td>Bs ${precioBs}</td>
+                <td><button onclick="iniciarVenta(${inv.indexOf(p)})" style="background:var(--s); color:white; padding:5px;">🛒</button></td>
+            </tr>`;
         });
 
-        const listaC = document.getElementById('listaCli');
-        listaC.innerHTML = "";
-        cli.forEach(c => {
-            listaC.innerHTML += `<tr><td>${c.nombre}</td><td>${c.moto}</td><td>${c.historial.slice(-1)}</td></tr>`;
-        });
+        const lCli = document.getElementById('listaClientes');
+        lCli.innerHTML = cli.slice(-10).map(c => `<div style='font-size:11px; border-bottom:1px solid #eee; padding:5px;'>${c.nombre} (${c.cedula})</div>`).join("");
     }
 
-    function showTab(tab) {
-        document.querySelectorAll('.tab-content').forEach(d => d.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tab).style.display = 'block';
-        event.currentTarget.classList.add('active');
+    function save() {
+        localStorage.setItem('ultra_inv', JSON.stringify(inv));
+        localStorage.setItem('ultra_cli', JSON.stringify(cli));
+        render();
     }
 
     render();
