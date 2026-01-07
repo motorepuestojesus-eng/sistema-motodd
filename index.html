@@ -3,294 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA POS ELITE v5.0 | Gestión Avanzada</title>
+    <title>SISTEMA POS INTELIGENTE | Franquicia Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #0f172a; --secondary: #1e293b; --accent: #38bdf8;
-            --success: #22c55e; --danger: #ef4444; --text: #f8fafc; --muted: #64748b;
+            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e;
+            --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--primary); color: var(--text); display: flex; height: 100vh; }
+        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Sidebar */
-        .sidebar { width: 260px; background: var(--secondary); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo { padding: 25px; font-weight: 800; font-size: 1.2rem; color: var(--accent); border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; }
-        .nav-link { padding: 15px 25px; color: #94a3b8; cursor: pointer; transition: 0.2s; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; }
-        .nav-link:hover, .nav-link.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
+        /* Navegación */
+        .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
+        .logo { padding: 25px; font-weight: 800; font-size: 1.2rem; color: var(--accent); border-bottom: 1px solid #334155; }
+        .nav-btn { padding: 15px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; font-size: 1rem; }
+        .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
 
-        /* Main Content */
-        .main { flex-grow: 1; padding: 30px; overflow-y: auto; background-image: radial-gradient(circle at top right, #1e293b, #0f172a); }
-        .page { display: none; animation: fadeIn 0.3s ease; }
+        /* Contenido */
+        .main { flex-grow: 1; padding: 25px; overflow-y: auto; }
+        .page { display: none; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
 
-        /* Cards & UI */
-        .card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 25px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
-        /* Inputs Pro */
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--muted); }
-        input, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; transition: 0.3s; }
-        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
+        /* BUSCADORES INTELIGENTES */
+        .search-container { position: relative; width: 100%; }
+        .results-dropdown { 
+            position: absolute; top: 100%; left: 0; right: 0; 
+            background: #2d3748; border: 1px solid var(--accent); 
+            z-index: 1000; border-radius: 0 0 8px 8px; 
+            max-height: 250px; overflow-y: auto; display: none; 
+        }
+        .result-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #4a5568; transition: 0.2s; }
+        .result-item:hover { background: var(--accent); color: var(--bg); }
 
-        /* Buttons */
-        .btn { padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: var(--primary); }
-        .btn-primary:hover { background: #7dd3fc; }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
+        /* Form Estilos */
+        input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; margin-top: 5px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: var(--bg); }
+        .btn-success { background: var(--success); color: white; width: 100%; font-size: 1.1rem; }
 
-        /* Table Design */
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        th { padding: 12px; text-align: left; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 16px; background: #1e293b; border-top: 1px solid #334155; border-bottom: 1px solid #334155; }
-        td:first-child { border-left: 1px solid #334155; border-radius: 12px 0 0 12px; }
-        td:last-child { border-right: 1px solid #334155; border-radius: 0 12px 12px 0; }
+        /* Carrito */
+        .cart-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .cart-table th { color: var(--muted); font-size: 0.8rem; text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
+        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #334155; }
 
-        /* POS Styles */
-        .pos-container { display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
-        .search-client-pos { position: relative; }
-        .client-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid var(--accent); z-index: 100; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; display: none; }
-        .client-opt { padding: 10px; cursor: pointer; border-bottom: 1px solid #334155; }
-        .client-opt:hover { background: var(--primary); color: var(--accent); }
+        .total-box { margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--accent); text-align: right; }
+        .total-box h2 { color: var(--accent); font-size: 2rem; }
     </style>
 </head>
 <body>
 
-    <nav class="sidebar">
-        <div class="logo"><i class="fas fa-bolt"></i> NEXUS RETAIL</div>
-        <button class="nav-link active" onclick="showPage('pos')"><i class="fas fa-terminal"></i> Terminal POS</button>
-        <button class="nav-link" onclick="showPage('clientes')"><i class="fas fa-address-book"></i> Directorio Clientes</button>
-        <button class="nav-link" onclick="showPage('inventario')"><i class="fas fa-boxes-stacked"></i> Inventario</button>
-        <button class="nav-link" onclick="showPage('historial')"><i class="fas fa-receipt"></i> Historial</button>
-    </nav>
+    <div class="sidebar">
+        <div class="logo"><i class="fas fa-shopping-basket"></i> GLOBAL SYSTEM</div>
+        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-cash-register"></i> Ventas</button>
+        <button class="nav-btn" onclick="tab('clientes')"><i class="fas fa-user-tag"></i> Clientes</button>
+        <button class="nav-btn" onclick="tab('stock')"><i class="fas fa-box-open"></i> Inventario</button>
+    </div>
 
     <main class="main">
-        <div id="page-clientes" class="page">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2>Directorio Central de Clientes</h2>
-                <div style="width: 300px;">
-                    <input type="text" id="cli-search" placeholder="🔍 Buscar por nombre o cédula..." onkeyup="filterClientes()">
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom:15px;">Registrar / Editar Cliente</h3>
-                <div class="grid-2">
-                    <div class="input-group">
-                        <label>Cédula o Identificación Fiscal</label>
-                        <input type="text" id="c-cedula" placeholder="Ej: 25.123.456">
-                    </div>
-                    <div class="input-group">
-                        <label>Nombre Completo</label>
-                        <input type="text" id="c-nombre" placeholder="Ej: Juan Pérez">
-                    </div>
-                    <div class="input-group">
-                        <label>Teléfono de Contacto</label>
-                        <input type="text" id="c-telefono" placeholder="Ej: +58 412...">
-                    </div>
-                    <div class="input-group">
-                        <label>Dirección de Domicilio</label>
-                        <input type="text" id="c-direccion" placeholder="Ej: Av. Principal Local 5">
-                    </div>
-                </div>
-                <div style="margin-top:10px; display:flex; gap:10px;">
-                    <button class="btn btn-primary" onclick="guardarCliente()"><i class="fas fa-save"></i> Guardar Cliente</button>
-                    <button class="btn btn-danger" onclick="limpiarFormCliente()">Limpiar Formulario</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <table>
-                    <thead>
-                        <tr><th>Identificación</th><th>Cliente</th><th>Teléfono</th><th>Ubicación</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody id="tabla-clientes"></tbody>
-                </table>
-            </div>
-        </div>
-
         <div id="page-pos" class="page active">
-            <div class="pos-container">
-                <div>
-                    <div class="card">
-                        <input type="text" id="pos-search-prod" placeholder="Escanear producto..." onkeyup="renderPOS()">
-                        <div id="pos-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:15px; margin-top:20px;"></div>
-                    </div>
-                </div>
+            <div class="grid" style="grid-template-columns: 1.2fr 0.8fr;">
                 
-                <div class="card" style="display:flex; flex-direction:column; height: 80vh;">
-                    <h3>Nueva Transacción</h3>
-                    <div class="search-client-pos" style="margin-top:15px;">
-                        <input type="text" id="pos-cli-input" placeholder="Escribe cédula o nombre del cliente..." onkeyup="posSearchClient(this.value)">
-                        <div id="pos-client-list" class="client-dropdown"></div>
-                    </div>
-                    <div id="selected-client-badge" style="margin:10px 0; padding:10px; background:rgba(56, 189, 248, 0.1); border-radius:8px; display:none;">
-                        <i class="fas fa-user-check"></i> <span id="active-cli-name"></span>
+                <div class="card">
+                    <h3><i class="fas fa-search"></i> Buscar Producto</h3>
+                    <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 10px;">Busca por Nombre o Marca (Ej: Harina Pan)</p>
+                    <div class="search-container">
+                        <input type="text" id="input-prod" placeholder="Escribe nombre del producto o marca..." onkeyup="buscarProductoPredictivo(this.value)">
+                        <div id="res-prod" class="results-dropdown"></div>
                     </div>
 
-                    <div id="pos-cart" style="flex-grow:1; overflow-y:auto; border-top:1px solid #334155; margin-top:10px; padding-top:10px;"></div>
-                    
-                    <div style="border-top:2px solid var(--accent); padding-top:20px;">
-                        <div style="display:flex; justify-content:space-between; font-size:1.8rem; font-weight:900;">
-                            <span>TOTAL:</span> <span id="pos-total">$0.00</span>
-                        </div>
-                        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:15px; padding:18px;" onclick="finalizarVenta()">
-                            PROCESAR PAGO <i class="fas fa-chevron-right"></i>
-                        </button>
+                    <table class="cart-table">
+                        <thead>
+                            <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr>
+                        </thead>
+                        <tbody id="cart-items"></tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-user-check"></i> Datos del Cliente</h3>
+                    <div class="search-container">
+                        <input type="text" id="input-cedula" placeholder="Ingresa Cédula para validar..." onkeyup="buscarClientePredictivo(this.value)">
+                        <div id="res-cli" class="results-dropdown"></div>
+                    </div>
+
+                    <div id="info-cliente-confirmado" style="margin-top: 15px; padding: 15px; background: #0f172a; border-radius: 8px; display: none; border-left: 4px solid var(--success);">
+                        <b id="v-nombre">Cargando...</b><br>
+                        <small id="v-tel"></small><br>
+                        <small id="v-dir"></small>
+                    </div>
+
+                    <div class="total-box">
+                        <p>Total a Pagar:</p>
+                        <h2 id="v-total">$0.00</h2>
+                        <button class="btn btn-success" style="margin-top: 15px;" onclick="procesarPago()">FINALIZAR VENTA (F10)</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div id="page-clientes" class="page">
+            <div class="card">
+                <h2>Registrar Nuevo Cliente</h2>
+                <div class="grid" style="margin-top:15px;">
+                    <input type="text" id="reg-cedula" placeholder="Cédula">
+                    <input type="text" id="reg-nombre" placeholder="Nombre y Apellido">
+                    <input type="text" id="reg-tel" placeholder="Teléfono">
+                    <input type="text" id="reg-dir" placeholder="Dirección Completa">
+                </div>
+                <button class="btn btn-primary" style="margin-top:15px;" onclick="guardarCliente()">Guardar en Base de Datos</button>
+            </div>
+        </div>
+
+        <div id="page-stock" class="page">
+            <div class="card">
+                <h2>Agregar Producto al Inventario</h2>
+                <div class="grid" style="margin-top:15px;">
+                    <input type="text" id="p-nombre" placeholder="Nombre (Ej: Harina de Maíz)">
+                    <input type="text" id="p-marca" placeholder="Marca (Ej: PAN)">
+                    <input type="number" id="p-precio" placeholder="Precio ($)">
+                    <input type="number" id="p-stock" placeholder="Cantidad en Stock">
+                </div>
+                <button class="btn btn-primary" style="margin-top:15px;" onclick="guardarProducto()">Cargar al Sistema</button>
+            </div>
+        </div>
+
     </main>
 
     <script>
+        // --- DATOS ---
         let db = {
-            clientes: JSON.parse(localStorage.getItem('sys_cli')) || [],
-            productos: JSON.parse(localStorage.getItem('sys_prod')) || [],
-            ventas: JSON.parse(localStorage.getItem('sys_ven')) || [],
+            clientes: JSON.parse(localStorage.getItem('g_cli')) || [],
+            productos: JSON.parse(localStorage.getItem('g_pro')) || [],
             carrito: [],
-            clienteActual: null
+            clienteSeleccionado: null
         };
 
-        function showPage(id) {
+        function tab(t) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-'+t).classList.add('active');
             event.currentTarget.classList.add('active');
-            renderAll();
         }
 
-        // --- LÓGICA DE CLIENTES (USABILIDAD) ---
-        function guardarCliente() {
-            const cedula = document.getElementById('c-cedula').value.trim();
-            const nombre = document.getElementById('c-nombre').value.trim();
-            
-            if(!cedula || !nombre) return alert("Cédula y Nombre son requeridos");
+        // --- LÓGICA DE BÚSQUEDA DE CLIENTE ---
+        function buscarClientePredictivo(val) {
+            const res = document.getElementById('res-cli');
+            if(val.length < 2) { res.style.display = 'none'; return; }
 
-            // Evitar duplicados por cédula
-            const index = db.clientes.findIndex(c => c.cedula === cedula);
-            const clienteData = {
-                cedula, 
-                nombre, 
-                tel: document.getElementById('c-telefono').value,
-                dir: document.getElementById('c-direccion').value
-            };
-
-            if(index > -1) {
-                db.clientes[index] = clienteData; // Actualizar
-                alert("Datos del cliente actualizados");
-            } else {
-                db.clientes.push(clienteData); // Crear
-                alert("Cliente registrado con éxito");
-            }
-
-            guardar();
-            limpiarFormCliente();
-            renderAll();
-        }
-
-        function editarCliente(cedula) {
-            const c = db.clientes.find(x => x.cedula === cedula);
-            document.getElementById('c-cedula').value = c.cedula;
-            document.getElementById('c-nombre').value = c.nombre;
-            document.getElementById('c-telefono').value = c.tel;
-            document.getElementById('c-direccion').value = c.dir;
-            document.getElementById('c-nombre').focus();
-        }
-
-        function eliminarCliente(cedula) {
-            if(confirm("¿Seguro que desea eliminar este cliente?")) {
-                db.clientes = db.clientes.filter(c => c.cedula !== cedula);
-                guardar();
-                renderAll();
-            }
-        }
-
-        function filterClientes() {
-            const busqueda = document.getElementById('cli-search').value.toLowerCase();
-            const filtrados = db.clientes.filter(c => 
-                c.nombre.toLowerCase().includes(busqueda) || c.cedula.includes(busqueda)
-            );
-            renderTablaClientes(filtrados);
-        }
-
-        // --- USABILIDAD EN POS (AUTOCOMPLETADO) ---
-        function posSearchClient(val) {
-            const list = document.getElementById('pos-client-list');
-            if(!val) { list.style.display = 'none'; return; }
-            
-            const matches = db.clientes.filter(c => 
-                c.nombre.toLowerCase().includes(val.toLowerCase()) || c.cedula.includes(val)
-            );
-
-            if(matches.length > 0) {
-                list.innerHTML = matches.map(c => `
-                    <div class="client-opt" onclick="seleccionarClientePOS('${c.cedula}')">
-                        <b>${c.nombre}</b> <small>(${c.cedula})</small>
+            const m = db.clientes.filter(c => c.cedula.includes(val));
+            if(m.length > 0) {
+                res.innerHTML = m.map(c => `
+                    <div class="result-item" onclick="confirmarCliente('${c.cedula}')">
+                        <i class="fas fa-user"></i> ${c.nombre} (ID: ${c.cedula})
                     </div>
                 `).join('');
-                list.style.display = 'block';
+                res.style.display = 'block';
             } else {
-                list.innerHTML = `<div class="client-opt" onclick="showPage('clientes')">➕ Cliente no existe. Registrar nuevo</div>`;
-                list.style.display = 'block';
+                res.innerHTML = `<div class="result-item" onclick="tab('clientes')">❌ No existe. Clic para registrar</div>`;
+                res.style.display = 'block';
             }
         }
 
-        function seleccionarClientePOS(cedula) {
+        function confirmarCliente(cedula) {
             const c = db.clientes.find(x => x.cedula === cedula);
-            db.clienteActual = c;
-            document.getElementById('active-cli-name').innerText = c.nombre;
-            document.getElementById('selected-client-badge').style.display = 'block';
-            document.getElementById('pos-client-list').style.display = 'none';
-            document.getElementById('pos-cli-input').value = '';
+            db.clienteSeleccionado = c;
+            document.getElementById('res-cli').style.display = 'none';
+            document.getElementById('input-cedula').value = c.cedula;
+            
+            document.getElementById('info-cliente-confirmado').style.display = 'block';
+            document.getElementById('v-nombre').innerText = c.nombre;
+            document.getElementById('v-tel').innerText = "Telf: " + c.tel;
+            document.getElementById('v-dir').innerText = "Dir: " + c.dir;
         }
 
-        // --- FUNCIONES CORE ---
-        function guardar() {
-            localStorage.setItem('sys_cli', JSON.stringify(db.clientes));
-            localStorage.setItem('sys_prod', JSON.stringify(db.productos));
-            localStorage.setItem('sys_ven', JSON.stringify(db.ventas));
+        // --- LÓGICA DE BÚSQUEDA DE PRODUCTO ---
+        function buscarProductoPredictivo(val) {
+            const res = document.getElementById('res-prod');
+            if(val.length < 1) { res.style.display = 'none'; return; }
+
+            const m = db.productos.filter(p => 
+                p.nombre.toLowerCase().includes(val.toLowerCase()) || 
+                p.marca.toLowerCase().includes(val.toLowerCase())
+            );
+
+            if(m.length > 0) {
+                res.innerHTML = m.map(p => `
+                    <div class="result-item" onclick="agregarAlCarrito(${p.id})">
+                        <b>${p.nombre}</b> - <small>${p.marca}</small> 
+                        <span style="float:right; color:var(--accent)">$${p.precio} (Stock: ${p.stock})</span>
+                    </div>
+                `).join('');
+                res.style.display = 'block';
+            } else {
+                res.style.display = 'none';
+            }
         }
 
-        function renderTablaClientes(data = db.clientes) {
-            const tbody = document.getElementById('tabla-clientes');
-            tbody.innerHTML = data.map(c => `
-                <tr>
-                    <td><b>${c.cedula}</b></td>
-                    <td>${c.nombre}</td>
-                    <td>${c.tel}</td>
-                    <td>${c.dir}</td>
-                    <td>
-                        <button class="btn btn-primary" onclick="editarCliente('${c.cedula}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger" onclick="eliminarCliente('${c.cedula}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+        function agregarAlCarrito(id) {
+            const p = db.productos.find(x => x.id === id);
+            if(p.stock <= 0) return alert("¡Sin existencias!");
+
+            const item = db.carrito.find(x => x.id === id);
+            if(item) item.cant++;
+            else db.carrito.push({...p, cant: 1});
+
+            document.getElementById('res-prod').style.display = 'none';
+            document.getElementById('input-prod').value = '';
+            renderCarrito();
         }
 
-        function limpiarFormCliente() {
-            document.getElementById('c-cedula').value = '';
-            document.getElementById('c-nombre').value = '';
-            document.getElementById('c-telefono').value = '';
-            document.getElementById('c-direccion').value = '';
+        function renderCarrito() {
+            const t = document.getElementById('cart-items');
+            t.innerHTML = '';
+            let total = 0;
+            db.carrito.forEach((item, i) => {
+                const sub = item.precio * item.cant;
+                total += sub;
+                t.innerHTML += `
+                    <tr>
+                        <td>${item.nombre} <br><small>${item.marca}</small></td>
+                        <td>${item.cant}</td>
+                        <td>$${item.precio}</td>
+                        <td>$${sub.toFixed(2)}</td>
+                        <td><i class="fas fa-trash" style="color:var(--danger); cursor:pointer" onclick="db.carrito.splice(${i},1);renderCarrito()"></i></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('v-total').innerText = `$${total.toFixed(2)}`;
         }
 
-        function renderAll() {
-            renderTablaClientes();
-            // Lógica para POS grid
-            const grid = document.getElementById('pos-grid');
-            grid.innerHTML = db.productos.map(p => `
-                <div class="client-opt" style="border:1px solid #334155; border-radius:10px; text-align:center;" onclick="addToCart(${p.id})">
-                    <b>${p.nombre}</b><br>$${p.precio}<br><small>Stock: ${p.stock}</small>
-                </div>
-            `).join('');
+        // --- GUARDADO DE DATOS ---
+        function guardarCliente() {
+            const c = {
+                cedula: document.getElementById('reg-cedula').value,
+                nombre: document.getElementById('reg-nombre').value,
+                tel: document.getElementById('reg-tel').value,
+                dir: document.getElementById('reg-dir').value
+            };
+            db.clientes.push(c);
+            localStorage.setItem('g_cli', JSON.stringify(db.clientes));
+            alert("Cliente afiliado correctamente");
+            tab('pos');
         }
 
-        // Inicialización
-        renderAll();
+        function guardarProducto() {
+            const p = {
+                id: Date.now(),
+                nombre: document.getElementById('p-nombre').value,
+                marca: document.getElementById('p-marca').value,
+                precio: parseFloat(document.getElementById('p-precio').value),
+                stock: parseInt(document.getElementById('p-stock').value)
+            };
+            db.productos.push(p);
+            localStorage.setItem('g_pro', JSON.stringify(db.productos));
+            alert("Producto añadido al sistema");
+            document.getElementById('p-nombre').value = '';
+        }
+
+        function procesarPago() {
+            if(db.carrito.length === 0) return alert("El carrito está vacío");
+            if(!db.clienteSeleccionado) return alert("Debe seleccionar un cliente antes de cobrar");
+
+            // Descontar stock real
+            db.carrito.forEach(c => {
+                const p = db.productos.find(x => x.id === c.id);
+                p.stock -= c.cant;
+            });
+
+            localStorage.setItem('g_pro', JSON.stringify(db.productos));
+            alert("Venta procesada con éxito para: " + db.clienteSeleccionado.nombre);
+            db.carrito = [];
+            db.clienteSeleccionado = null;
+            location.reload(); // Reiniciar para nueva venta
+        }
     </script>
 </body>
 </html>
