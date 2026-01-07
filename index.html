@@ -3,173 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ventas - Registro por Cédula</title>
+    <title>Enterprise Global POS | Sistema de Franquicia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --primary: #2c3e50; --accent: #2980b9; --light: #ecf0f1; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; }
-        .tab-btn { padding: 12px 20px; border: none; background: #ddd; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        :root {
+            --bg-dark: #0f172a;
+            --bg-sidebar: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --card-bg: #1e293b;
+            --border: #334155;
+        }
 
-        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: var(--light); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; background: var(--accent); color: white; }
-        
-        .marca-header { background: #34495e; color: white; padding: 10px; margin-top: 20px; border-radius: 5px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        
-        .venta-box { border: 2px solid var(--accent); padding: 15px; border-radius: 8px; margin-top: 10px; background: #e8f4fd; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 280px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .logo { padding: 30px; font-size: 1.5rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 12px; }
+        nav { flex-grow: 1; padding: 10px 15px; }
+        .nav-btn { width: 100%; padding: 14px; background: transparent; border: none; color: var(--text-muted); text-align: left; cursor: pointer; border-radius: 8px; margin-bottom: 8px; transition: 0.2s; display: flex; align-items: center; gap: 12px; font-size: 0.95rem; }
+        .nav-btn:hover { background: #334155; color: white; }
+        .nav-btn.active { background: var(--accent); color: var(--bg-dark); font-weight: 700; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; }
+        .tab-section { display: none; animation: fadeIn 0.3s ease; }
+        .tab-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- GRID DE VENTAS (POS) --- */
+        .pos-layout { display: grid; grid-template-columns: 1fr 420px; gap: 20px; height: 85vh; }
+        .inventory-panel { display: flex; flex-direction: column; gap: 15px; }
+        .search-bar { position: relative; }
+        .search-bar input { width: 100%; padding: 15px 45px; background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 1rem; }
+        .search-bar i { position: absolute; left: 15px; top: 18px; color: var(--text-muted); }
+
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; overflow-y: auto; padding-right: 5px; }
+        .p-card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; text-align: center; }
+        .p-card:hover { border-color: var(--accent); transform: scale(1.02); }
+        .p-card .price { color: var(--accent); font-weight: 800; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+        .p-card .name { font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block; }
+        .p-card .stock { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* --- CARRITO / FACTURACIÓN --- */
+        .checkout-panel { background: var(--bg-sidebar); border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .client-info { padding: 20px; border-bottom: 1px solid var(--border); }
+        .cart-list { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #0f172a; padding: 10px; border-radius: 8px; }
+        .summary { padding: 20px; background: #0f172a; border-radius: 0 0 20px 20px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 500; }
+        .summary-row.total { font-size: 1.8rem; color: var(--accent); border-top: 1px solid var(--border); padding-top: 15px; margin-top: 10px; font-weight: 800; }
+
+        /* --- TABLAS --- */
+        .table-container { background: var(--bg-sidebar); border-radius: 15px; padding: 20px; border: 1px solid var(--border); margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; color: var(--text-muted); border-bottom: 1px solid var(--border); font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 15px 12px; border-bottom: 1px solid #2d3748; font-size: 0.9rem; }
+
+        /* --- BOTONES --- */
+        .btn-pay { background: var(--success); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; margin-top: 10px; }
+        .btn-pay:hover { opacity: 0.9; }
+        .btn-primary { background: var(--accent); color: var(--bg-dark); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+        /* --- MODALES --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
+        .modal-content { background: var(--bg-sidebar); width: 450px; margin: 80px auto; padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: var(--bg-dark); border: 1px solid var(--border); color: white; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('inventario')">📦 Inventario</button>
-        <button class="tab-btn" onclick="showTab('clientes')">👥 Base de Datos Clientes</button>
-    </div>
-
-    <div id="inventario" class="tab-content active">
-        <h3>Registrar Producto</h3>
-        <div class="form-group">
-            <input type="text" id="marca" placeholder="Marca / Proveedor">
-            <input type="text" id="modelo" placeholder="Modelo">
-            <input type="number" id="precio" placeholder="Precio ($)">
-            <button onclick="agregarProducto()">Guardar Producto</button>
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-gem"></i> GLOBAL FRANCHISE</div>
+        <nav>
+            <button onclick="showTab('pos')" class="nav-btn active" id="btn-pos"><i class="fas fa-cash-register"></i> Punto de Venta</button>
+            <button onclick="showTab('clientes')" class="nav-btn" id="btn-clientes"><i class="fas fa-users"></i> Base de Clientes</button>
+            <button onclick="showTab('productos')" class="nav-btn" id="btn-productos"><i class="fas fa-boxes"></i> Inventario Global</button>
+            <button onclick="showTab('ventas')" class="nav-btn" id="btn-ventas"><i class="fas fa-file-invoice-dollar"></i> Historial de Ventas</button>
+        </nav>
+        <div style="padding: 20px; font-size: 0.7rem; color: var(--text-muted);">
+            Terminal ID: #8892-FR<br>
+            Server: Global-Main
         </div>
-        <div id="listaInventario"></div>
-    </div>
+    </aside>
 
-    <div id="clientes" class="tab-content">
-        <h3>Clientes Registrados</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Cédula</th>
-                    <th>Nombre</th>
-                    <th>Teléfono</th>
-                    <th>Compras Realizadas</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyClientes"></tbody>
-        </table>
-    </div>
+    <main class="main-content">
+        <section id="tab-pos" class="tab-section active">
+            <div class="pos-layout">
+                <div class="inventory-panel">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="pos-search" placeholder="Buscar producto por nombre o categoría..." onkeyup="filterPOS()">
+                    </div>
+                    <div class="product-grid" id="pos-grid"></div>
+                </div>
 
-    <div id="seccionVenta" style="display:none;" class="venta-box">
-        <h3>Procesar Venta: <span id="prodVentaNom"></span></h3>
-        <div class="form-group">
-            <input type="text" id="v_cedula" placeholder="Ingrese Cédula" oninput="buscarCliente()">
-            <input type="text" id="v_nombre" placeholder="Nombre Completo">
-            <input type="text" id="v_telefono" placeholder="Teléfono">
-            <button onclick="confirmarVenta()" style="background: #27ae60;">Finalizar Venta</button>
-            <button onclick="cerrarVenta()" style="background: #e74c3c;">Cancelar</button>
+                <div class="checkout-panel">
+                    <div class="client-info">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="pos-id-cliente" placeholder="Cédula/ID del Cliente">
+                            <button onclick="validarCliente()" class="btn-primary">Buscar</button>
+                        </div>
+                        <div id="cliente-activo" style="margin-top: 10px; font-size: 0.85rem; color: var(--accent);">
+                            Cliente: Consumidor Final
+                        </div>
+                    </div>
+                    <div class="cart-list" id="cart-list">
+                        </div>
+                    <div class="summary">
+                        <div class="summary-row"><span>Subtotal</span> <span id="res-sub">$0.00</span></div>
+                        <div class="summary-row"><span>IVA (16%)</span> <span id="res-tax">$0.00</span></div>
+                        <div class="summary-row total"><span>TOTAL</span> <span id="res-total">$0.00</span></div>
+                        <button class="btn-pay" onclick="checkout()">FINALIZAR VENTA</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-clientes" class="tab-section">
+            <div style="display:flex; justify-content: space-between;">
+                <h2>Maestro de Clientes</h2>
+                <button class="btn-primary" onclick="openModal('m-cliente')">+ Nuevo Cliente</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>ID/Cédula</th><th>Nombre</th><th>Teléfono</th><th>Dirección</th></tr>
+                    </thead>
+                    <tbody id="t-clientes-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-productos" class="tab-section">
+            <div style="display:flex; justify-content: space-between;">
+                <h2>Gestión de Inventario</h2>
+                <button class="btn-primary" onclick="openModal('m-producto')">+ Añadir Producto</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th></tr>
+                    </thead>
+                    <tbody id="t-productos-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-ventas" class="tab-section">
+            <h2>Historial de Transacciones Globales</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Total</th></tr>
+                    </thead>
+                    <tbody id="t-ventas-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="m-cliente" class="modal">
+        <div class="modal-content">
+            <h3>Registrar Cliente</h3>
+            <input type="text" id="nc-id" placeholder="Cédula / Pasaporte">
+            <input type="text" id="nc-nombre" placeholder="Nombre Completo">
+            <input type="text" id="nc-tel" placeholder="Teléfono">
+            <input type="text" id="nc-dir" placeholder="Dirección Fiscal">
+            <div style="display:flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeModal('m-cliente')" style="flex:1; padding:10px;">Cerrar</button>
+                <button onclick="guardarCliente()" class="btn-primary" style="flex:1;">Guardar</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    let inventario = JSON.parse(localStorage.getItem('tienda_inv')) || [];
-    let clientes = JSON.parse(localStorage.getItem('tienda_cli')) || [];
-    let productoSeleccionado = null;
+    <div id="m-producto" class="modal">
+        <div class="modal-content">
+            <h3>Añadir Item al Stock</h3>
+            <input type="text" id="np-nombre" placeholder="Nombre del Producto">
+            <input type="text" id="np-cat" placeholder="Categoría">
+            <input type="number" id="np-precio" placeholder="Precio de Venta">
+            <input type="number" id="np-stock" placeholder="Cantidad Inicial">
+            <div style="display:flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeModal('m-producto')" style="flex:1; padding:10px;">Cerrar</button>
+                <button onclick="guardarProducto()" class="btn-primary" style="flex:1;">Añadir</button>
+            </div>
+        </div>
+    </div>
 
-    function showTab(id) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-        renderizarTodo();
-    }
+    <script>
+        // --- BASE DE DATOS LOCAL ---
+        let db = {
+            clientes: JSON.parse(localStorage.getItem('f_clientes')) || [
+                {id: '1', nombre: 'Cliente General', tel: '000', dir: 'Ciudad'}
+            ],
+            productos: JSON.parse(localStorage.getItem('f_productos')) || [
+                {id: 101, nombre: 'Laptop Business', cat: 'Electrónica', precio: 1200, stock: 5},
+                {id: 102, nombre: 'Smartwatch V2', cat: 'Electrónica', precio: 250, stock: 15}
+            ],
+            ventas: JSON.parse(localStorage.getItem('f_ventas')) || [],
+            carrito: [],
+            clienteSeleccionado: null
+        };
 
-    function agregarProducto() {
-        const marca = document.getElementById('marca').value.trim();
-        const modelo = document.getElementById('modelo').value.trim();
-        const precio = document.getElementById('precio').value;
-        if(!marca || !modelo || !precio) return alert("Faltan datos");
-        
-        inventario.push({ id: Date.now(), marca, modelo, precio });
-        localStorage.setItem('tienda_inv', JSON.stringify(inventario));
-        renderizarTodo();
-    }
-
-    function buscarCliente() {
-        const cedula = document.getElementById('v_cedula').value;
-        const cliente = clientes.find(c => c.cedula === cedula);
-        if(cliente) {
-            document.getElementById('v_nombre').value = cliente.nombre;
-            document.getElementById('v_telefono').value = cliente.telefono;
-            document.getElementById('v_nombre').disabled = true;
-            document.getElementById('v_telefono').disabled = true;
-        } else {
-            document.getElementById('v_nombre').value = "";
-            document.getElementById('v_telefono').value = "";
-            document.getElementById('v_nombre').disabled = false;
-            document.getElementById('v_telefono').disabled = false;
+        // --- NAVEGACIÓN ---
+        function showTab(tab) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('btn-' + tab).classList.add('active');
+            renderAll();
         }
-    }
 
-    function abrirVenta(id) {
-        productoSeleccionado = inventario.find(p => p.id === id);
-        document.getElementById('prodVentaNom').innerText = `${productoSeleccionado.marca} - ${productoSeleccionado.modelo}`;
-        document.getElementById('seccionVenta').style.display = 'block';
-        window.scrollTo(0,0);
-    }
-
-    function confirmarVenta() {
-        const cedula = document.getElementById('v_cedula').value;
-        const nombre = document.getElementById('v_nombre').value;
-        const telefono = document.getElementById('v_telefono').value;
-
-        if(!cedula || !nombre) return alert("Cédula y Nombre requeridos");
-
-        let cliente = clientes.find(c => c.cedula === cedula);
-        if(!cliente) {
-            cliente = { cedula, nombre, telefono, compras: [] };
-            clientes.push(cliente);
-        }
-        
-        const fecha = new Date().toLocaleDateString();
-        cliente.compras.push(`${fecha}: ${productoSeleccionado.modelo} ($${productoSeleccionado.precio})`);
-        
-        localStorage.setItem('tienda_cli', JSON.stringify(clientes));
-        alert("Venta registrada exitosamente");
-        cerrarVenta();
-        renderizarTodo();
-    }
-
-    function cerrarVenta() {
-        document.getElementById('seccionVenta').style.display = 'none';
-        document.getElementById('v_cedula').value = "";
-        document.getElementById('v_nombre').value = "";
-        document.getElementById('v_telefono').value = "";
-    }
-
-    function renderizarTodo() {
-        const contenedor = document.getElementById('listaInventario');
-        contenedor.innerHTML = "";
-        const marcas = [...new Set(inventario.map(p => p.marca))];
-
-        marcas.forEach(m => {
-            let html = `<div class="marca-header">MARCA: ${m.toUpperCase()}</div><table><thead><tr><th>Modelo</th><th>Precio</th><th>Acción</th></tr></thead><tbody>`;
-            inventario.filter(p => p.marca === m).forEach(p => {
-                html += `<tr><td>${p.modelo}</td><td>$${p.precio}</td><td><button onclick="abrirVenta(${p.id})">Vender</button></td></tr>`;
+        // --- LÓGICA DE PRODUCTOS ---
+        function renderPOS() {
+            const grid = document.getElementById('pos-grid');
+            grid.innerHTML = '';
+            db.productos.forEach(p => {
+                grid.innerHTML += `
+                    <div class="p-card" onclick="agregarAlCarrito(${p.id})">
+                        <span class="price">$${p.precio}</span>
+                        <span class="name">${p.nombre}</span>
+                        <span class="stock">Stock: ${p.stock}</span>
+                    </div>
+                `;
             });
-            html += `</tbody></table>`;
-            contenedor.innerHTML += html;
-        });
+        }
 
-        const tbodyCli = document.getElementById('tbodyClientes');
-        tbodyCli.innerHTML = "";
-        clientes.forEach(c => {
-            tbodyCli.innerHTML += `<tr><td>${c.cedula}</td><td>${c.nombre}</td><td>${c.telefono}</td><td>${c.compras.join('<br>')}</td></tr>`;
-        });
-    }
+        function agregarAlCarrito(id) {
+            const p = db.productos.find(x => x.id === id);
+            if(p.stock <= 0) return alert("Producto sin Stock");
+            
+            const existe = db.carrito.find(x => x.id === id);
+            if(existe) {
+                if(existe.cant < p.stock) existe.cant++;
+                else alert("Máximo stock alcanzado");
+            } else {
+                db.carrito.push({...p, cant: 1});
+            }
+            renderCarrito();
+        }
 
-    renderizarTodo();
-</script>
+        function renderCarrito() {
+            const lista = document.getElementById('cart-list');
+            lista.innerHTML = '';
+            let sub = 0;
+            db.carrito.forEach((item, idx) => {
+                sub += (item.precio * item.cant);
+                lista.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <b>${item.nombre}</b><br>
+                            <small>${item.cant} x $${item.precio}</small>
+                        </div>
+                        <button onclick="eliminarDelCarrito(${idx})" style="background:none; border:none; color:red; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+            });
+            const tax = sub * 0.16;
+            document.getElementById('res-sub').innerText = `$${sub.toFixed(2)}`;
+            document.getElementById('res-tax').innerText = `$${tax.toFixed(2)}`;
+            document.getElementById('res-total').innerText = `$${(sub + tax).toFixed(2)}`;
+        }
+
+        function eliminarDelCarrito(idx) {
+            db.carrito.splice(idx, 1);
+            renderCarrito();
+        }
+
+        // --- LÓGICA DE CLIENTES ---
+        function validarCliente() {
+            const id = document.getElementById('pos-id-cliente').value;
+            const c = db.clientes.find(x => x.id === id);
+            if(c) {
+                db.clienteSeleccionado = c;
+                document.getElementById('cliente-activo').innerText = "Cliente: " + c.nombre;
+            } else {
+                if(confirm("Cliente no registrado. ¿Registrar ahora?")) showTab('clientes');
+            }
+        }
+
+        // --- CIERRE DE VENTA ---
+        function checkout() {
+            if(db.carrito.length === 0) return alert("Carrito vacío");
+            
+            const total = document.getElementById('res-total').innerText;
+            const venta = {
+                id: "F-" + (db.ventas.length + 1001),
+                fecha: new Date().toLocaleString(),
+                cliente: db.clienteSeleccionado ? db.clienteSeleccionado.nombre : "Consumidor Final",
+                total: total
+            };
+
+            // Descontar Stock
+            db.carrito.forEach(item => {
+                const prod = db.productos.find(x => x.id === item.id);
+                prod.stock -= item.cant;
+            });
+
+            db.ventas.push(venta);
+            db.carrito = [];
+            db.clienteSeleccionado = null;
+            document.getElementById('cliente-activo').innerText = "Cliente: Consumidor Final";
+            document.getElementById('pos-id-cliente').value = "";
+            
+            save();
+            renderAll();
+            alert("Venta Exitosa. Folio: " + venta.id);
+        }
+
+        // --- UTILIDADES ---
+        function save() {
+            localStorage.setItem('f_clientes', JSON.stringify(db.clientes));
+            localStorage.setItem('f_productos', JSON.stringify(db.productos));
+            localStorage.setItem('f_ventas', JSON.stringify(db.ventas));
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function guardarCliente() {
+            const nc = {
+                id: document.getElementById('nc-id').value,
+                nombre: document.getElementById('nc-nombre').value,
+                tel: document.getElementById('nc-tel').value,
+                dir: document.getElementById('nc-dir').value
+            };
+            db.clientes.push(nc);
+            save(); closeModal('m-cliente'); renderAll();
+        }
+
+        function guardarProducto() {
+            const np = {
+                id: Date.now(),
+                nombre: document.getElementById('np-nombre').value,
+                cat: document.getElementById('np-cat').value,
+                precio: parseFloat(document.getElementById('np-precio').value),
+                stock: parseInt(document.getElementById('np-stock').value)
+            };
+            db.productos.push(np);
+            save(); closeModal('m-producto'); renderAll();
+        }
+
+        function renderAll() {
+            renderPOS();
+            renderCarrito();
+            
+            // Tablas
+            document.getElementById('t-clientes-body').innerHTML = db.clientes.map(c => 
+                `<tr><td>${c.id}</td><td>${c.nombre}</td><td>${c.tel}</td><td>${c.dir}</td></tr>`).join('');
+            
+            document.getElementById('t-productos-body').innerHTML = db.productos.map(p => 
+                `<tr><td>${p.nombre}</td><td>${p.cat}</td><td>$${p.precio}</td><td>${p.stock}</td></tr>`).join('');
+            
+            document.getElementById('t-ventas-body').innerHTML = db.ventas.map(v => 
+                `<tr><td>${v.id}</td><td>${v.fecha}</td><td>${v.cliente}</td><td>${v.total}</td></tr>`).join('');
+        }
+
+        // Iniciar
+        renderAll();
+    </script>
 </body>
 </html>
