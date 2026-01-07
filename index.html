@@ -2,60 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA FRANQUICIA ELITE v12</title>
+    <title>SISTEMA FRANQUICIA ELITE v13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; 
             --success: #10b981; --danger: #ef4444; --text: #f1f5f9; --muted: #94a3b8;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Navegación Lateral Estética */
         .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo { padding: 30px 20px; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-align: center; letter-spacing: 1px; }
-        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; transition: all 0.3s; font-size: 0.95rem; border-left: 4px solid transparent; }
-        .nav-btn:hover { background: #2d3748; color: white; }
+        .logo { padding: 30px 20px; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-align: center; }
+        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
         .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); font-weight: 600; }
 
-        /* Contenedor Principal */
         .main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top right, #1e293b, #0f172a); }
-        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page { display: none; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Cards y UI */
-        .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 25px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        h2, h3 { margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 25px; }
         
-        /* Form Estilizados */
-        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-        .input-group { margin-bottom: 15px; position: relative; }
-        label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: var(--muted); }
-        input, select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; transition: 0.2s; }
-        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
+        input, select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; margin-top: 5px; }
+        input:focus { border-color: var(--accent); outline: none; }
 
-        /* Buscadores Flotantes */
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #2d3748; border: 1px solid var(--accent); z-index: 100; border-radius: 0 0 10px 10px; max-height: 250px; overflow-y: auto; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .res-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #334155; transition: 0.2s; }
-        .res-item:hover { background: var(--accent); color: #000; }
+        /* BUSCADOR */
+        .search-container { position: relative; }
+        .results-box { position: absolute; top: 100%; left: 0; right: 0; background: #2d3748; border: 1px solid var(--accent); z-index: 100; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; display: none; }
+        .res-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #334155; }
+        .res-item:hover, .res-item.selected { background: var(--accent); color: #000; }
 
-        /* Tablas Elegantes */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; padding: 15px 10px; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid #334155; }
-        td { padding: 15px 10px; border-bottom: 1px solid #334155; font-size: 0.95rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 10px; color: var(--muted); border-bottom: 2px solid #334155; }
+        td { padding: 15px 10px; border-bottom: 1px solid #334155; }
         
-        /* Panel de Totales */
-        .total-display { text-align: center; padding: 30px; background: #0f172a; border-radius: 15px; border: 1px solid #334155; margin-top: 20px; }
-        .val-usd { font-size: 3.5rem; font-weight: 800; color: var(--accent); }
-        .val-bs { font-size: 1.8rem; color: var(--success); font-weight: 700; display: none; margin-top: 10px; border-top: 1px dashed #334155; padding-top: 10px; }
-
-        .btn { padding: 14px 25px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-primary { background: var(--accent); color: #000; width: 100%; margin-top: 10px; }
-        .btn-primary:hover { background: #7dd3fc; transform: translateY(-2px); }
-        .btn-success { background: var(--success); color: white; width: 100%; font-size: 1.1rem; }
-        .btn-excel { background: #166534; color: white; }
+        .total-display { text-align: center; padding: 20px; background: #0f172a; border-radius: 15px; border: 1px solid #334155; }
+        .val-usd { font-size: 3rem; font-weight: 800; color: var(--accent); }
+        .val-bs { font-size: 1.5rem; color: var(--success); display: none; border-top: 1px dashed #334155; margin-top: 10px; padding-top: 10px; }
+        
+        .btn-success { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     </style>
 </head>
 <body>
@@ -63,115 +49,103 @@
     <nav class="sidebar">
         <div class="logo">GLOBAL POS</div>
         <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-cash-register"></i> Ventas</button>
-        <button class="nav-btn" onclick="tab('cli')"><i class="fas fa-user-plus"></i> Clientes</button>
+        <button class="nav-btn" onclick="tab('cli')"><i class="fas fa-user-plus"></i> Registro Clientes</button>
         <button class="nav-btn" onclick="tab('inv')"><i class="fas fa-boxes"></i> Inventario</button>
         <button class="nav-btn" onclick="tab('rep')"><i class="fas fa-chart-bar"></i> Consolidado</button>
     </nav>
 
     <main class="main">
         <div id="tab-pos" class="page active">
-            <div style="display: grid; grid-template-columns: 1fr 450px; gap: 30px;">
-                
-                <div class="section-left">
-                    <div class="card" style="border-left: 5px solid var(--accent);">
-                        <div style="display: flex; gap: 20px; align-items: center;">
-                            <div style="flex: 1;">
-                                <label>Tasa Oficial BCV del Día</label>
-                                <input type="number" id="tasa-v" value="36.50" step="0.01" onchange="calcTotal()">
-                            </div>
-                            <div style="flex: 2;">
-                                <h3><i class="fas fa-shopping-cart"></i> Buscar Productos</h3>
-                                <div class="input-group">
-                                    <input type="text" id="p-search" placeholder="Escriba nombre o marca..." autocomplete="off">
-                                    <div id="p-list" class="search-results"></div>
-                                </div>
-                            </div>
+            <div style="display: grid; grid-template-columns: 1fr 400px; gap: 30px;">
+                <div>
+                    <div class="card" style="display: flex; gap: 20px; align-items: center;">
+                        <div style="width: 150px;">
+                            <label>Tasa BCV</label>
+                            <input type="number" id="tasa-v" value="36.50" step="0.01" onchange="updateUI()">
+                        </div>
+                        <div style="flex: 1;" class="search-container">
+                            <label>Buscar Producto (Nombre o Marca)</label>
+                            <input type="text" id="p-search" placeholder="Escribe y presiona Enter..." autocomplete="off">
+                            <div id="p-res" class="results-box"></div>
                         </div>
                     </div>
-
                     <div class="card">
                         <table>
-                            <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
-                            <tbody id="cart-body"></tbody>
+                            <thead><tr><th>Producto</th><th>Cant</th><th>Precio</th><th>Total</th><th></th></tr></thead>
+                            <tbody id="cart-list"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="section-right">
+                <div>
+                    <div class="card search-container">
+                        <label>Cédula del Cliente</label>
+                        <input type="text" id="c-search" placeholder="Escribe y presiona Enter..." autocomplete="off">
+                        <div id="c-res" class="results-box"></div>
+                        <div id="c-status" style="margin-top:15px; padding:10px; background:rgba(56,189,248,0.1); border-radius:8px; display:none; color:var(--accent); border:1px solid var(--accent)"></div>
+                    </div>
+
                     <div class="card">
-                        <h3><i class="fas fa-user-circle"></i> Cliente</h3>
-                        <div class="input-group">
-                            <input type="text" id="c-search" placeholder="Ingrese Cédula..." autocomplete="off">
-                            <div id="c-list" class="search-results"></div>
-                        </div>
-                        <div id="c-view" style="margin-top:10px; padding:12px; background: rgba(56, 189, 248, 0.1); border-radius: 8px; display:none; color: var(--accent);"></div>
-
-                        <h3 style="margin-top:25px;"><i class="fas fa-wallet"></i> Forma de Pago</h3>
-                        <select id="p-metodo" onchange="calcTotal()">
+                        <label>Método de Pago</label>
+                        <select id="p-metodo" onchange="updateUI()">
                             <option value="USD">Divisas ($)</option>
-                            <option value="BS">Efectivo Bs. (BCV)</option>
-                            <option value="PUNTO">Punto de Venta (BCV)</option>
-                            <option value="PM">Pago Móvil (BCV)</option>
+                            <option value="BS">Efectivo Bs.</option>
+                            <option value="PUNTO">Punto de Venta</option>
+                            <option value="PM">Pago Móvil</option>
                         </select>
-
-                        <div class="total-display">
-                            <span style="color: var(--muted); font-size: 0.9rem;">TOTAL NETO</span>
-                            <div class="val-usd" id="total-usd">$0.00</div>
-                            <div class="val-bs" id="total-bs">0.00 Bs.</div>
-                            <button class="btn btn-success" style="margin-top:25px;" onclick="cobrar()">FINALIZAR VENTA</button>
+                        <div class="total-display" style="margin-top:20px;">
+                            <div class="val-usd" id="v-usd">$0.00</div>
+                            <div class="val-bs" id="v-bs">0.00 Bs.</div>
                         </div>
+                        <button class="btn-success" onclick="finalizarVenta()">FINALIZAR (ENTER)</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="tab-cli" class="page">
-            <div class="card" style="max-width: 800px; margin: 0 auto;">
-                <h2><i class="fas fa-user-plus"></i> Registrar Cliente</h2>
+            <div class="card">
+                <h2>Registrar Cliente</h2>
                 <div class="form-grid">
-                    <div class="input-group"><label>Cédula / RIF</label><input type="text" id="reg-ced"></div>
-                    <div class="input-group"><label>Nombre Completo</label><input type="text" id="reg-nom"></div>
-                    <div class="input-group"><label>Teléfono</label><input type="text" id="reg-tel"></div>
-                    <div class="input-group"><label>Dirección</label><input type="text" id="reg-dir"></div>
+                    <div><label>Cédula</label><input type="text" id="rc"></div>
+                    <div><label>Nombre</label><input type="text" id="rn"></div>
+                    <div><label>Teléfono</label><input type="text" id="rt"></div>
+                    <div><label>Dirección</label><input type="text" id="rd"></div>
                 </div>
-                <button class="btn btn-primary" onclick="guardarCli()">GUARDAR EN BASE DE DATOS</button>
+                <button class="btn-success" onclick="saveC()">GUARDAR CLIENTE</button>
             </div>
         </div>
 
         <div id="tab-inv" class="page">
-            <div class="card" style="max-width: 800px; margin: 0 auto;">
-                <h2><i class="fas fa-plus-circle"></i> Cargar Producto</h2>
+            <div class="card">
+                <h2>Cargar Producto</h2>
                 <div class="form-grid">
-                    <div class="input-group"><label>Nombre del Producto</label><input type="text" id="inv-nom"></div>
-                    <div class="input-group"><label>Marca</label><input type="text" id="inv-mar"></div>
-                    <div class="input-group"><label>Precio ($)</label><input type="number" id="inv-pre" step="0.01"></div>
-                    <div class="input-group"><label>Stock Inicial</label><input type="number" id="inv-sto"></div>
+                    <div><label>Producto</label><input type="text" id="pn"></div>
+                    <div><label>Marca</label><input type="text" id="pm"></div>
+                    <div><label>Precio $</label><input type="number" id="pp" step="0.01"></div>
+                    <div><label>Stock</label><input type="number" id="ps"></div>
                 </div>
-                <button class="btn btn-primary" onclick="guardarPro()">AÑADIR AL INVENTARIO</button>
+                <button class="btn-success" onclick="saveP()">GUARDAR PRODUCTO</button>
             </div>
         </div>
 
         <div id="tab-rep" class="page">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <h2><i class="fas fa-file-invoice-dollar"></i> Consolidado del Día</h2>
-                <button class="btn btn-excel" onclick="descargarExcel()"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2>Consolidado</h2>
+                <button onclick="exportar()" style="padding:10px; background:#166534; color:white; border:none; border-radius:5px; cursor:pointer">Excel</button>
             </div>
             <div class="card">
-                <table>
-                    <thead><tr><th>Fecha/Hora</th><th>Cliente</th><th>Monto $</th><th>Monto Bs</th></tr></thead>
-                    <tbody id="report-table"></tbody>
-                </table>
+                <table id="rtable"><thead><tr><th>Fecha</th><th>Cliente</th><th>USD</th><th>BS</th></tr></thead><tbody id="rbody"></tbody></table>
             </div>
         </div>
-
     </main>
 
     <script>
         let db = {
-            cli: JSON.parse(localStorage.getItem('g_cli')) || [],
-            pro: JSON.parse(localStorage.getItem('g_pro')) || [],
-            ven: JSON.parse(localStorage.getItem('g_ven')) || [],
-            cart: [], cliAct: null, sumaUsd: 0
+            cli: JSON.parse(localStorage.getItem('f_cli')) || [],
+            pro: JSON.parse(localStorage.getItem('f_pro')) || [],
+            ven: JSON.parse(localStorage.getItem('f_ven')) || [],
+            cart: [], cliAct: null, totalUSD: 0
         };
 
         function tab(id) {
@@ -179,122 +153,98 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
             event.currentTarget.classList.add('active');
-            if(id === 'rep') renderRep();
+            if(id==='rep') renderRep();
         }
 
-        // --- BUSCADORES INTELIGENTES CON INTRO ---
-        const pSearch = document.getElementById('p-search');
-        pSearch.addEventListener('keyup', (e) => {
-            const val = pSearch.value.toLowerCase();
-            const resBox = document.getElementById('p-list');
-            if(!val) { resBox.style.display = 'none'; return; }
-
-            const matches = db.pro.filter(p => p.nom.toLowerCase().includes(val) || p.mar.toLowerCase().includes(val));
+        // --- BUSCADOR CLIENTE + ENTER ---
+        const ci = document.getElementById('c-search');
+        ci.addEventListener('keyup', (e) => {
+            const v = ci.value;
+            const res = document.getElementById('c-res');
+            const matches = db.cli.filter(c => c.ced.includes(v));
             
-            if(e.key === 'Enter' && matches.length > 0) {
-                addAlCarrito(matches[0].id);
-                pSearch.value = '';
-                resBox.style.display = 'none';
-                return;
+            if(e.key === 'Enter') {
+                if(matches.length > 0) {
+                    seleccionarCli(matches[0].ced);
+                    res.style.display = 'none';
+                    document.getElementById('p-search').focus();
+                } return;
             }
-
-            resBox.innerHTML = matches.map(p => `<div class="res-item" onclick="addAlCarrito(${p.id})"><b>${p.nom}</b> - ${p.mar} ($${p.pre})</div>`).join('');
-            resBox.style.display = matches.length ? 'block' : 'none';
+            res.innerHTML = matches.map(c => `<div class="res-item" onclick="seleccionarCli('${c.ced}')">${c.ced} - ${c.nom}</div>`).join('');
+            res.style.display = (v && matches.length) ? 'block' : 'none';
         });
 
-        const cSearch = document.getElementById('c-search');
-        cSearch.addEventListener('keyup', (e) => {
-            const val = cSearch.value;
-            const resBox = document.getElementById('c-list');
-            if(!val) { resBox.style.display = 'none'; return; }
+        function seleccionarCli(ced) {
+            db.cliAct = db.cli.find(c => c.ced === ced);
+            document.getElementById('c-search').value = ced;
+            document.getElementById('c-status').innerHTML = `<b>Asociado a:</b> ${db.cliAct.nom}`;
+            document.getElementById('c-status').style.display = 'block';
+            document.getElementById('c-res').style.display = 'none';
+        }
 
-            const matches = db.cli.filter(c => c.ced.includes(val));
+        // --- BUSCADOR PRODUCTO + ENTER ---
+        const pi = document.getElementById('p-search');
+        pi.addEventListener('keyup', (e) => {
+            const v = pi.value.toLowerCase();
+            const res = document.getElementById('p-res');
+            const matches = db.pro.filter(p => p.nom.toLowerCase().includes(v) || p.mar.toLowerCase().includes(v));
 
-            if(e.key === 'Enter' && matches.length > 0) {
-                confirmarCli(matches[0].ced);
-                resBox.style.display = 'none';
-                pSearch.focus();
-                return;
+            if(e.key === 'Enter') {
+                if(v === "" && db.cart.length > 0) { finalizarVenta(); return; } // ENTER finaliza si buscador vacio
+                if(matches.length > 0) {
+                    addCart(matches[0].id);
+                    pi.value = '';
+                    res.style.display = 'none';
+                } return;
             }
-
-            resBox.innerHTML = matches.map(c => `<div class="res-item" onclick="confirmarCli('${c.ced}')">${c.ced} - ${c.nom}</div>`).join('');
-            resBox.style.display = matches.length ? 'block' : 'none';
+            res.innerHTML = matches.map(p => `<div class="res-item" onclick="addCart(${p.id})">${p.nom} (${p.mar}) - $${p.pre}</div>`).join('');
+            res.style.display = (v && matches.length) ? 'block' : 'none';
         });
 
-        function addAlCarrito(id) {
+        function addCart(id) {
             const p = db.pro.find(x => x.id === id);
             const ex = db.cart.find(x => x.id === id);
             if(ex) ex.cant++; else db.cart.push({...p, cant: 1});
             renderCart();
-            pSearch.focus();
-        }
-
-        function confirmarCli(ced) {
-            db.cliAct = db.cli.find(x => x.ced === ced);
-            document.getElementById('c-search').value = ced;
-            document.getElementById('c-view').innerHTML = `<b>Cliente:</b> ${db.cliAct.nom} <br><small>Telf: ${db.cliAct.tel}</small>`;
-            document.getElementById('c-view').style.display = 'block';
         }
 
         function renderCart() {
-            const body = document.getElementById('cart-body');
-            body.innerHTML = ''; db.sumaUsd = 0;
+            const l = document.getElementById('cart-list');
+            l.innerHTML = ''; db.totalUSD = 0;
             db.cart.forEach((i, idx) => {
-                const sub = i.pre * i.cant; db.sumaUsd += sub;
-                body.innerHTML += `<tr><td>${i.nom} <br><small>${i.mar}</small></td><td>${i.cant}</td><td>$${i.pre}</td><td>$${sub.toFixed(2)}</td><td><i class="fas fa-trash" style="color:var(--danger); cursor:pointer" onclick="db.cart.splice(${idx},1);renderCart()"></i></td></tr>`;
+                const sub = i.pre * i.cant; db.totalUSD += sub;
+                l.innerHTML += `<tr><td>${i.nom}</td><td>${i.cant}</td><td>$${i.pre}</td><td>$${sub.toFixed(2)}</td><td><i class="fas fa-trash" onclick="eliminar(${idx})" style="color:red;cursor:pointer"></i></td></tr>`;
             });
-            calcTotal();
+            updateUI();
         }
 
-        function calcTotal() {
+        function updateUI() {
             const tasa = parseFloat(document.getElementById('tasa-v').value);
-            const metodo = document.getElementById('p-metodo').value;
-            document.getElementById('total-usd').innerText = `$${db.sumaUsd.toFixed(2)}`;
-            const bsBox = document.getElementById('total-bs');
-            if(metodo !== 'USD' && db.sumaUsd > 0) {
-                bsBox.innerText = (db.sumaUsd * tasa).toFixed(2) + " Bs.";
-                bsBox.style.display = 'block';
-            } else bsBox.style.display = 'none';
+            const met = document.getElementById('p-metodo').value;
+            document.getElementById('v-usd').innerText = `$${db.totalUSD.toFixed(2)}`;
+            const vbs = document.getElementById('v-bs');
+            if(met !== 'USD' && db.totalUSD > 0) {
+                vbs.innerText = (db.totalUSD * tasa).toFixed(2) + " Bs.";
+                vbs.style.display = 'block';
+            } else vbs.style.display = 'none';
         }
 
-        function cobrar() {
-            if(!db.cliAct || db.cart.length === 0) return alert("Seleccione cliente y cargue productos");
-            const tasa = parseFloat(document.getElementById('tasa-v').value);
-            db.ven.push({
-                f: new Date().toLocaleString(),
-                c: db.cliAct.nom,
-                u: db.sumaUsd.toFixed(2),
-                b: (db.sumaUsd * tasa).toFixed(2)
-            });
-            localStorage.setItem('g_ven', JSON.stringify(db.ven));
-            alert("VENTA FINALIZADA");
+        function finalizarVenta() {
+            if(!db.cliAct || !db.cart.length) return alert("Falta cliente o productos");
+            const t = parseFloat(document.getElementById('tasa-v').value);
+            db.ven.push({ f: new Date().toLocaleString(), c: db.cliAct.nom, u: db.totalUSD.toFixed(2), b: (db.totalUSD * t).toFixed(2) });
+            localStorage.setItem('f_ven', JSON.stringify(db.ven));
+            alert("VENTA GUARDADA");
             location.reload();
         }
 
-        // --- CRUD LIMPIO ---
-        function guardarCli() {
-            db.cli.push({ced: document.getElementById('reg-ced').value, nom: document.getElementById('reg-nom').value, tel: document.getElementById('reg-tel').value, dir: document.getElementById('reg-dir').value});
-            localStorage.setItem('g_cli', JSON.stringify(db.cli));
-            alert("Cliente guardado");
-            tab('pos');
-        }
-
-        function guardarPro() {
-            db.pro.push({id: Date.now(), nom: document.getElementById('inv-nom').value, mar: document.getElementById('inv-mar').value, pre: parseFloat(document.getElementById('inv-pre').value), sto: document.getElementById('inv-sto').value});
-            localStorage.setItem('g_pro', JSON.stringify(db.pro));
-            alert("Producto guardado");
-            tab('pos');
-        }
-
-        function renderRep() {
-            document.getElementById('report-table').innerHTML = db.ven.map(v => `<tr><td>${v.f}</td><td>${v.c}</td><td>$${v.u}</td><td>${v.b} Bs</td></tr>`).join('');
-        }
-
-        function descargarExcel() {
-            let csv = "Fecha,Cliente,Dolares,Bolivares\n";
-            db.ven.forEach(v => csv += `${v.f},${v.c},${v.u},${v.b}\n`);
-            const blob = new Blob([csv], {type: 'text/csv'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'consolidado.csv'; a.click();
+        function eliminar(idx) { db.cart.splice(idx,1); renderCart(); }
+        function saveC() { db.cli.push({ced: document.getElementById('rc').value, nom: document.getElementById('rn').value, tel: document.getElementById('rt').value, dir: document.getElementById('rd').value}); localStorage.setItem('f_cli', JSON.stringify(db.cli)); alert("Cliente Guardado"); }
+        function saveP() { db.pro.push({id: Date.now(), nom: document.getElementById('pn').value, mar: document.getElementById('pm').value, pre: parseFloat(document.getElementById('pp').value), sto: document.getElementById('ps').value}); localStorage.setItem('f_pro', JSON.stringify(db.pro)); alert("Producto Guardado"); }
+        function renderRep() { document.getElementById('rbody').innerHTML = db.ven.map(v => `<tr><td>${v.f}</td><td>${v.c}</td><td>$${v.u}</td><td>${v.b} Bs</td></tr>`).join(''); }
+        function exportar() {
+            let c = "Fecha,Cliente,USD,BS\n" + db.ven.map(v => `${v.f},${v.c},${v.u},${v.b}`).join("\n");
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([c], {type:'text/csv'})); a.download = 'consolidado.csv'; a.click();
         }
     </script>
 </body>
