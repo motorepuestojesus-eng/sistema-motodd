@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA FRANQUICIA V15 - FIX CÉDULA</title>
+    <title>SISTEMA POS ELITE - CONSOLIDADO DETALLADO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -14,7 +14,7 @@
 
         .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
         .logo { padding: 30px 20px; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-align: center; }
-        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; }
+        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
         .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
 
         .main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top right, #1e293b, #0f172a); }
@@ -25,12 +25,12 @@
         input, select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; margin-top: 5px; }
         input:focus { border-color: var(--accent); outline: none; }
 
-        .results-box { position: absolute; top: 100%; left: 0; right: 0; background: #2d3748; border: 2px solid var(--accent); z-index: 1000; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .results-box { position: absolute; top: 100%; left: 0; right: 0; background: #2d3748; border: 2px solid var(--accent); z-index: 1000; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; }
         .res-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #334155; color: white; }
         .res-item:hover { background: var(--accent); color: #000; }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px 10px; color: var(--muted); border-bottom: 2px solid #334155; }
+        th { text-align: left; padding: 15px 10px; color: var(--muted); border-bottom: 2px solid #334155; font-size: 0.85rem; }
         td { padding: 15px 10px; border-bottom: 1px solid #334155; }
 
         .total-display { text-align: center; padding: 25px; background: #0f172a; border-radius: 15px; border: 2px solid #334155; }
@@ -50,13 +50,12 @@
         <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-cash-register"></i> Ventas</button>
         <button class="nav-btn" onclick="tab('cli')"><i class="fas fa-user-plus"></i> Clientes</button>
         <button class="nav-btn" onclick="tab('inv')"><i class="fas fa-boxes"></i> Inventario</button>
-        <button class="nav-btn" onclick="tab('rep')"><i class="fas fa-file-invoice"></i> Reportes</button>
+        <button class="nav-btn" onclick="tab('rep')"><i class="fas fa-file-invoice"></i> Consolidado</button>
     </nav>
 
     <main class="main">
         <div id="tab-pos" class="page active">
             <div style="display: grid; grid-template-columns: 1fr 420px; gap: 30px;">
-                
                 <div>
                     <div class="card" style="display: flex; gap: 20px; align-items: flex-end;">
                         <div style="width: 140px;">
@@ -69,7 +68,6 @@
                             <div id="p-res" class="results-box" style="display:none;"></div>
                         </div>
                     </div>
-
                     <div class="card">
                         <table>
                             <thead><tr><th>Item</th><th>Cant</th><th>Precio</th><th>Total</th><th></th></tr></thead>
@@ -85,9 +83,8 @@
                             <input type="text" id="c-input" placeholder="Escriba Cédula..." autocomplete="off">
                             <div id="c-res" class="results-box" style="display:none;"></div>
                         </div>
-                        
                         <div id="badge-cliente">
-                            <div style="color: var(--success); font-size: 0.7rem; font-weight: bold;">CLIENTE VINCULADO</div>
+                            <div style="color: var(--success); font-size: 0.7rem; font-weight: bold;">VINCULADO</div>
                             <h3 id="c-nombre-display" style="margin: 5px 0; color: white;">---</h3>
                             <small id="c-cedula-display" style="color: var(--muted);">---</small>
                         </div>
@@ -96,16 +93,16 @@
                     <div class="card">
                         <label>Método de Pago</label>
                         <select id="p-metodo" onchange="calcTotal()">
-                            <option value="USD">Divisas ($)</option>
-                            <option value="BS">Efectivo Bs.</option>
-                            <option value="PUNTO">Punto de Venta</option>
-                            <option value="PM">Pago Móvil</option>
+                            <option value="Divisa">Divisa ($)</option>
+                            <option value="Efectivo Bs">Efectivo Bs.</option>
+                            <option value="Punto">Punto de Venta</option>
+                            <option value="Pago Movil">Pago Móvil</option>
                         </select>
                         <div class="total-display" style="margin-top:20px;">
                             <div class="val-usd" id="t-usd">$0.00</div>
                             <div class="val-bs" id="t-bs" style="display:none;">0.00 Bs.</div>
                         </div>
-                        <button class="btn-action" onclick="finalizarVenta()">FINALIZAR VENTA (ENTER)</button>
+                        <button class="btn-action" onclick="finalizarVenta()">PROCESAR (ENTER)</button>
                     </div>
                 </div>
             </div>
@@ -140,11 +137,19 @@
         <div id="tab-rep" class="page">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                    <h2>Ventas Realizadas</h2>
-                    <button onclick="exportExcel()" style="padding:10px; background:#166534; color:white; border:none; border-radius:5px; cursor:pointer">Exportar CSV</button>
+                    <h2>Consolidado de Ventas</h2>
+                    <button onclick="exportExcel()" style="padding:10px 20px; background:#1d6f42; color:white; border:none; border-radius:8px; cursor:pointer; font-weight: bold;"><i class="fas fa-file-excel"></i> DESCARGAR EXCEL DETALLADO</button>
                 </div>
                 <table>
-                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Total $</th><th>Total Bs</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Pago</th>
+                            <th>Total ($)</th>
+                            <th>Total (Bs)</th>
+                        </tr>
+                    </thead>
                     <tbody id="rep-body"></tbody>
                 </table>
             </div>
@@ -152,12 +157,11 @@
     </main>
 
     <script>
-        // BASE DE DATOS LOCAL
         let db = {
-            cli: JSON.parse(localStorage.getItem('pos_cli')) || [],
-            pro: JSON.parse(localStorage.getItem('pos_pro')) || [],
-            ven: JSON.parse(localStorage.getItem('pos_ven')) || [],
-            cart: [], clienteSeleccionado: null, totalUSD: 0
+            cli: JSON.parse(localStorage.getItem('p26_cli')) || [],
+            pro: JSON.parse(localStorage.getItem('p26_pro')) || [],
+            ven: JSON.parse(localStorage.getItem('p26_ven')) || [],
+            cart: [], cliAct: null, totalUSD: 0
         };
 
         function tab(id) {
@@ -168,80 +172,51 @@
             if(id==='rep') renderRep();
         }
 
-        // --- LÓGICA DE BÚSQUEDA DE CÉDULA (FIXED) ---
-        const inputCedula = document.getElementById('c-input');
-        const listaCedula = document.getElementById('c-res');
+        // --- BUSCADOR CÉDULA ---
+        const cIn = document.getElementById('c-input');
+        const cRes = document.getElementById('c-res');
 
-        inputCedula.addEventListener('input', () => {
-            const val = inputCedula.value.trim();
-            if (!val) { listaCedula.style.display = 'none'; return; }
-            
-            const coincidencias = db.cli.filter(c => c.ced.includes(val));
-            
-            if (coincidencias.length > 0) {
-                listaCedula.innerHTML = coincidencias.map(c => 
-                    `<div class="res-item" onclick="vincularCliente('${c.ced}')">${c.ced} - ${c.nom}</div>`
-                ).join('');
-                listaCedula.style.display = 'block';
-            } else {
-                listaCedula.style.display = 'none';
+        cIn.addEventListener('input', () => {
+            const val = cIn.value.trim();
+            if(!val) { cRes.style.display='none'; return; }
+            const matches = db.cli.filter(c => c.ced.includes(val));
+            cRes.innerHTML = matches.map(c => `<div class="res-item" onclick="vincular('${c.ced}')">${c.ced} - ${c.nom}</div>`).join('');
+            cRes.style.display = matches.length ? 'block' : 'none';
+        });
+
+        cIn.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                const match = db.cli.find(c => c.ced.includes(cIn.value.trim()));
+                if(match) { vincular(match.ced); document.getElementById('p-input').focus(); }
             }
         });
 
-        inputCedula.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const val = inputCedula.value.trim();
-                const exacto = db.cli.find(c => c.ced === val);
-                const parcial = db.cli.find(c => c.ced.includes(val));
-                
-                const clienteAFijar = exacto || parcial;
-
-                if (clienteAFijar) {
-                    vincularCliente(clienteAFijar.ced);
-                    listaCedula.style.display = 'none';
-                    document.getElementById('p-input').focus();
-                } else {
-                    alert("Cliente no encontrado. Regístrelo en la pestaña Clientes.");
-                }
-            }
-        });
-
-        function vincularCliente(ced) {
-            const cliente = db.cli.find(c => c.ced === ced);
-            if (cliente) {
-                db.clienteSeleccionado = cliente;
-                document.getElementById('c-input').value = cliente.ced;
-                document.getElementById('c-nombre-display').innerText = cliente.nom;
-                document.getElementById('c-cedula-display').innerText = "CI: " + cliente.ced + " | Telf: " + (cliente.tel || 'N/S');
-                document.getElementById('badge-cliente').style.display = 'block';
-                listaCedula.style.display = 'none';
-            }
+        function vincular(ced) {
+            db.cliAct = db.cli.find(c => c.ced === ced);
+            document.getElementById('c-input').value = ced;
+            document.getElementById('c-nombre-display').innerText = db.cliAct.nom;
+            document.getElementById('c-cedula-display').innerText = "CI: "+db.cliAct.ced;
+            document.getElementById('badge-cliente').style.display = 'block';
+            cRes.style.display = 'none';
         }
 
-        // --- LÓGICA DE PRODUCTOS ---
-        const inputPro = document.getElementById('p-input');
-        const listaPro = document.getElementById('p-res');
+        // --- BUSCADOR PRODUCTOS ---
+        const pIn = document.getElementById('p-input');
+        const pRes = document.getElementById('p-res');
 
-        inputPro.addEventListener('input', () => {
-            const val = inputPro.value.toLowerCase();
-            if (!val) { listaPro.style.display = 'none'; return; }
-            const coincidencias = db.pro.filter(p => p.nom.toLowerCase().includes(val) || p.mar.toLowerCase().includes(val));
-            listaPro.innerHTML = coincidencias.map(p => 
-                `<div class="res-item" onclick="addCart(${p.id})">${p.nom} (${p.mar}) - $${p.pre}</div>`
-            ).join('');
-            listaPro.style.display = coincidencias.length ? 'block' : 'none';
+        pIn.addEventListener('input', () => {
+            const val = pIn.value.toLowerCase();
+            if(!val) { pRes.style.display='none'; return; }
+            const matches = db.pro.filter(p => p.nom.toLowerCase().includes(val) || p.mar.toLowerCase().includes(val));
+            pRes.innerHTML = matches.map(p => `<div class="res-item" onclick="addCart(${p.id})">${p.nom} - $${p.pre}</div>`).join('');
+            pRes.style.display = matches.length ? 'block' : 'none';
         });
 
-        inputPro.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const val = inputPro.value.toLowerCase();
-                if (val === "" && db.cart.length > 0) { finalizarVenta(); return; }
-                const item = db.pro.find(p => p.nom.toLowerCase().includes(val) || p.mar.toLowerCase().includes(val));
-                if (item) {
-                    addCart(item.id);
-                    inputPro.value = "";
-                    listaPro.style.display = 'none';
-                }
+        pIn.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                if(pIn.value === "" && db.cart.length > 0) { finalizarVenta(); return; }
+                const item = db.pro.find(p => p.nom.toLowerCase().includes(pIn.value.toLowerCase()));
+                if(item) { addCart(item.id); pIn.value = ""; pRes.style.display='none'; }
             }
         });
 
@@ -263,52 +238,59 @@
         }
 
         function calcTotal() {
-            const tasa = parseFloat(document.getElementById('tasa-v').value);
-            const met = document.getElementById('p-metodo').value;
+            const t = parseFloat(document.getElementById('tasa-v').value);
+            const m = document.getElementById('p-metodo').value;
             document.getElementById('t-usd').innerText = `$${db.totalUSD.toFixed(2)}`;
             const bs = document.getElementById('t-bs');
-            if(met !== 'USD' && db.totalUSD > 0) {
-                bs.innerText = (db.totalUSD * tasa).toFixed(2) + " Bs.";
+            if(m !== 'Divisa' && db.totalUSD > 0) {
+                bs.innerText = (db.totalUSD * t).toFixed(2) + " Bs.";
                 bs.style.display = 'block';
-            } else { bs.style.display = 'none'; }
+            } else bs.style.display = 'none';
         }
 
         function finalizarVenta() {
-            if(!db.clienteSeleccionado || !db.cart.length) return alert("Error: Seleccione un cliente válido y agregue productos.");
+            if(!db.cliAct || !db.cart.length) return alert("Error: Falta Cliente o Productos");
             const t = parseFloat(document.getElementById('tasa-v').value);
+            const met = document.getElementById('p-metodo').value;
             db.ven.push({
                 f: new Date().toLocaleString(),
-                c: db.clienteSeleccionado.nom,
+                c: db.cliAct.nom,
+                m: met,
                 u: db.totalUSD.toFixed(2),
-                b: (db.totalUSD * t).toFixed(2)
+                b: (met === 'Divisa') ? "0.00" : (db.totalUSD * t).toFixed(2)
             });
-            localStorage.setItem('pos_ven', JSON.stringify(db.ven));
-            alert("Venta registrada con éxito.");
+            localStorage.setItem('p26_ven', JSON.stringify(db.ven));
+            alert("VENTA PROCESADA");
             location.reload();
         }
 
-        // --- FUNCIONES DE GUARDADO ---
         function saveCli() {
-            const cliente = { ced: document.getElementById('rc').value, nom: document.getElementById('rn').value, tel: document.getElementById('rt').value, dir: document.getElementById('rd').value };
-            if(!cliente.ced || !cliente.nom) return alert("Cédula y Nombre son obligatorios");
-            db.cli.push(cliente);
-            localStorage.setItem('pos_cli', JSON.stringify(db.cli));
-            alert("Cliente guardado"); tab('pos');
+            db.cli.push({ced: document.getElementById('rc').value, nom: document.getElementById('rn').value, tel: document.getElementById('rt').value});
+            localStorage.setItem('p26_cli', JSON.stringify(db.cli)); alert("Guardado"); tab('pos');
         }
-
         function savePro() {
-            const producto = { id: Date.now(), nom: document.getElementById('pn').value, mar: document.getElementById('pm').value, pre: parseFloat(document.getElementById('pp').value), sto: document.getElementById('ps').value };
-            db.pro.push(producto);
-            localStorage.setItem('pos_pro', JSON.stringify(db.pro));
-            alert("Producto guardado"); tab('pos');
+            db.pro.push({id: Date.now(), nom: document.getElementById('pn').value, mar: document.getElementById('pm').value, pre: parseFloat(document.getElementById('pp').value)});
+            localStorage.setItem('p26_pro', JSON.stringify(db.pro)); alert("Guardado"); tab('pos');
+        }
+        function drop(i) { db.cart.splice(i,1); renderCart(); }
+
+        function renderRep() {
+            document.getElementById('rep-body').innerHTML = db.ven.map(v => `
+                <tr><td>${v.f}</td><td>${v.c}</td><td><small>${v.m}</small></td><td><b>$${v.u}</b></td><td>${v.b} Bs</td></tr>
+            `).join('');
         }
 
-        function drop(i) { db.cart.splice(i,1); renderCart(); }
-        function renderRep() { document.getElementById('rep-body').innerHTML = db.ven.map(v => `<tr><td>${v.f}</td><td>${v.c}</td><td>$${v.u}</td><td>${v.b} Bs</td></tr>`).join(''); }
         function exportExcel() {
-            let csv = "Fecha,Cliente,USD,BS\n" + db.ven.map(v => `${v.f},${v.c},${v.u},${v.b}`).join("\n");
-            const blob = new Blob([csv], {type:'text/csv'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'reporte_ventas.csv'; a.click();
+            let csv = "\uFEFF"; // BOM para acentos en Excel
+            csv += "FECHA Y HORA,CLIENTE,METODO DE PAGO,TOTAL USD,TOTAL BOLIVARES\n";
+            db.ven.forEach(v => {
+                csv += `"${v.f}","${v.c}","${v.m}","${v.u}","${v.b}"\n`;
+            });
+            const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Consolidado_Ventas_Franquicia.csv';
+            a.click();
         }
     </script>
 </body>
