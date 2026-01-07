@@ -3,101 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA POS INTELIGENTE | Franquicia Pro</title>
+    <title>SISTEMA FRANQUICIA V6.0 | Consolidado & Multimoneda</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e;
-            --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8;
+            --bg: #0a0f1d; --card: #161e2d; --accent: #38bdf8; --success: #10b981;
+            --danger: #f43f5e; --text: #f8fafc; --muted: #64748b;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Navegación */
-        .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo { padding: 25px; font-weight: 800; font-size: 1.2rem; color: var(--accent); border-bottom: 1px solid #334155; }
-        .nav-btn { padding: 15px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; font-size: 1rem; }
-        .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--card); border-right: 1px solid #2d3748; display: flex; flex-direction: column; }
+        .logo { padding: 25px; font-weight: 800; color: var(--accent); border-bottom: 1px solid #2d3748; text-align: center; }
+        .nav-btn { padding: 15px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; }
+        .nav-btn.active { background: #1e293b; color: white; border-left: 4px solid var(--accent); }
 
-        /* Contenido */
+        /* Main Content */
         .main { flex-grow: 1; padding: 25px; overflow-y: auto; }
         .page { display: none; }
         .page.active { display: block; }
-        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #2d3748; margin-bottom: 20px; }
 
-        /* BUSCADORES INTELIGENTES */
-        .search-container { position: relative; width: 100%; }
-        .results-dropdown { 
-            position: absolute; top: 100%; left: 0; right: 0; 
-            background: #2d3748; border: 1px solid var(--accent); 
-            z-index: 1000; border-radius: 0 0 8px 8px; 
-            max-height: 250px; overflow-y: auto; display: none; 
-        }
-        .result-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #4a5568; transition: 0.2s; }
-        .result-item:hover { background: var(--accent); color: var(--bg); }
+        /* POS Search */
+        .search-box { position: relative; margin-bottom: 15px; }
+        .dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid var(--accent); z-index: 1000; border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; }
+        .item-res { padding: 10px; cursor: pointer; border-bottom: 1px solid #2d3748; }
+        .item-res:hover { background: var(--accent); color: var(--bg); }
 
-        /* Form Estilos */
-        input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; margin-top: 5px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        /* Inputs & Buttons */
+        input, select { width: 100%; padding: 12px; background: #0a0f1d; border: 1px solid #2d3748; color: white; border-radius: 8px; margin-top: 5px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .btn { padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: var(--bg); }
-        .btn-success { background: var(--success); color: white; width: 100%; font-size: 1.1rem; }
+        .btn-success { background: var(--success); color: white; width: 100%; }
+        .btn-export { background: #475569; color: white; margin-bottom: 10px; }
 
-        /* Carrito */
-        .cart-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .cart-table th { color: var(--muted); font-size: 0.8rem; text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
-        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #334155; }
+        /* Tabla de Carrito */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: var(--muted); font-size: 0.8rem; padding: 10px; border-bottom: 1px solid #2d3748; }
+        td { padding: 12px 10px; border-bottom: 1px solid #2d3748; }
 
-        .total-box { margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--accent); text-align: right; }
-        .total-box h2 { color: var(--accent); font-size: 2rem; }
+        .total-panel { margin-top: 20px; padding: 15px; background: #0a0f1d; border-radius: 10px; border-left: 5px solid var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="logo"><i class="fas fa-shopping-basket"></i> GLOBAL SYSTEM</div>
-        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-cash-register"></i> Ventas</button>
-        <button class="nav-btn" onclick="tab('clientes')"><i class="fas fa-user-tag"></i> Clientes</button>
-        <button class="nav-btn" onclick="tab('stock')"><i class="fas fa-box-open"></i> Inventario</button>
-    </div>
+    <aside class="sidebar">
+        <div class="logo">FRANQUICIA MASTER</div>
+        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-cash-register"></i> Caja</button>
+        <button class="nav-btn" onclick="tab('clientes')"><i class="fas fa-users"></i> Clientes</button>
+        <button class="nav-btn" onclick="tab('productos')"><i class="fas fa-boxes"></i> Inventario</button>
+        <button class="nav-btn" onclick="tab('consolidado')"><i class="fas fa-file-csv"></i> Consolidado</button>
+    </aside>
 
     <main class="main">
         <div id="page-pos" class="page active">
-            <div class="grid" style="grid-template-columns: 1.2fr 0.8fr;">
-                
+            <div class="grid" style="grid-template-columns: 1.3fr 0.7fr;">
                 <div class="card">
-                    <h3><i class="fas fa-search"></i> Buscar Producto</h3>
-                    <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 10px;">Busca por Nombre o Marca (Ej: Harina Pan)</p>
-                    <div class="search-container">
-                        <input type="text" id="input-prod" placeholder="Escribe nombre del producto o marca..." onkeyup="buscarProductoPredictivo(this.value)">
-                        <div id="res-prod" class="results-dropdown"></div>
+                    <h3><i class="fas fa-search"></i> Buscar Producto o Marca</h3>
+                    <div class="search-box">
+                        <input type="text" id="p-search" placeholder="Escriba nombre o marca..." onkeyup="searchProd(this.value)">
+                        <div id="res-prod" class="dropdown"></div>
                     </div>
-
-                    <table class="cart-table">
-                        <thead>
-                            <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr>
-                        </thead>
-                        <tbody id="cart-items"></tbody>
+                    <table>
+                        <thead><tr><th>Item</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+                        <tbody id="cart-body"></tbody>
                     </table>
                 </div>
 
                 <div class="card">
-                    <h3><i class="fas fa-user-check"></i> Datos del Cliente</h3>
-                    <div class="search-container">
-                        <input type="text" id="input-cedula" placeholder="Ingresa Cédula para validar..." onkeyup="buscarClientePredictivo(this.value)">
-                        <div id="res-cli" class="results-dropdown"></div>
+                    <h3><i class="fas fa-user"></i> Cliente</h3>
+                    <div class="search-box">
+                        <input type="text" id="c-search" placeholder="Ingrese Cédula..." onkeyup="searchCli(this.value)">
+                        <div id="res-cli" class="dropdown"></div>
                     </div>
+                    <div id="cli-info" style="font-size: 0.9rem; color: var(--accent); margin: 10px 0; min-height: 40px;">No seleccionado</div>
 
-                    <div id="info-cliente-confirmado" style="margin-top: 15px; padding: 15px; background: #0f172a; border-radius: 8px; display: none; border-left: 4px solid var(--success);">
-                        <b id="v-nombre">Cargando...</b><br>
-                        <small id="v-tel"></small><br>
-                        <small id="v-dir"></small>
-                    </div>
+                    <h3><i class="fas fa-wallet"></i> Método de Pago</h3>
+                    <select id="pay-method">
+                        <option value="Divisa">Divisa ($)</option>
+                        <option value="Efectivo">Efectivo (Bs.)</option>
+                        <option value="Punto">Punto de Venta</option>
+                        <option value="Pago Movil">Pago Móvil</option>
+                    </select>
 
-                    <div class="total-box">
-                        <p>Total a Pagar:</p>
-                        <h2 id="v-total">$0.00</h2>
-                        <button class="btn btn-success" style="margin-top: 15px;" onclick="procesarPago()">FINALIZAR VENTA (F10)</button>
+                    <div class="total-panel">
+                        <p>Total a cobrar:</p>
+                        <h1 id="cart-total" style="color:var(--accent)">$0.00</h1>
+                        <button class="btn btn-success" style="margin-top:15px;" onclick="finishSale()">PROCESAR VENTA</button>
                     </div>
                 </div>
             </div>
@@ -106,38 +99,50 @@
         <div id="page-clientes" class="page">
             <div class="card">
                 <h2>Registrar Nuevo Cliente</h2>
-                <div class="grid" style="margin-top:15px;">
-                    <input type="text" id="reg-cedula" placeholder="Cédula">
-                    <input type="text" id="reg-nombre" placeholder="Nombre y Apellido">
+                <div class="grid">
+                    <input type="text" id="reg-id" placeholder="Cédula">
+                    <input type="text" id="reg-nom" placeholder="Nombre Completo">
                     <input type="text" id="reg-tel" placeholder="Teléfono">
-                    <input type="text" id="reg-dir" placeholder="Dirección Completa">
+                    <input type="text" id="reg-dir" placeholder="Dirección">
                 </div>
-                <button class="btn btn-primary" style="margin-top:15px;" onclick="guardarCliente()">Guardar en Base de Datos</button>
+                <button class="btn btn-success" style="margin-top:15px;" onclick="addCli()">Guardar Cliente</button>
             </div>
         </div>
 
-        <div id="page-stock" class="page">
+        <div id="page-productos" class="page">
             <div class="card">
-                <h2>Agregar Producto al Inventario</h2>
-                <div class="grid" style="margin-top:15px;">
-                    <input type="text" id="p-nombre" placeholder="Nombre (Ej: Harina de Maíz)">
-                    <input type="text" id="p-marca" placeholder="Marca (Ej: PAN)">
-                    <input type="number" id="p-precio" placeholder="Precio ($)">
-                    <input type="number" id="p-stock" placeholder="Cantidad en Stock">
+                <h2>Cargar Inventario</h2>
+                <div class="grid">
+                    <input type="text" id="ip-nom" placeholder="Producto">
+                    <input type="text" id="ip-mar" placeholder="Marca">
+                    <input type="number" id="ip-pre" placeholder="Precio ($)">
+                    <input type="number" id="ip-sto" placeholder="Cantidad">
                 </div>
-                <button class="btn btn-primary" style="margin-top:15px;" onclick="guardarProducto()">Cargar al Sistema</button>
+                <button class="btn btn-success" style="margin-top:15px;" onclick="addProd()">Añadir Producto</button>
             </div>
         </div>
 
+        <div id="page-consolidado" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Reporte de Ventas del Día</h2>
+                <button class="btn btn-export" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Descargar Excel (.csv)</button>
+            </div>
+            <div class="card">
+                <table>
+                    <thead><tr><th>Fecha/Hora</th><th>Cliente</th><th>Método</th><th>Total</th></tr></thead>
+                    <tbody id="sales-report-body"></tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
     <script>
-        // --- DATOS ---
         let db = {
-            clientes: JSON.parse(localStorage.getItem('g_cli')) || [],
-            productos: JSON.parse(localStorage.getItem('g_pro')) || [],
+            clientes: JSON.parse(localStorage.getItem('v6_cli')) || [],
+            productos: JSON.parse(localStorage.getItem('v6_pro')) || [],
+            ventas: JSON.parse(localStorage.getItem('v6_ven')) || [],
             carrito: [],
-            clienteSeleccionado: null
+            cliActivo: null
         };
 
         function tab(t) {
@@ -145,139 +150,116 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('page-'+t).classList.add('active');
             event.currentTarget.classList.add('active');
+            renderReport();
         }
 
-        // --- LÓGICA DE BÚSQUEDA DE CLIENTE ---
-        function buscarClientePredictivo(val) {
-            const res = document.getElementById('res-cli');
-            if(val.length < 2) { res.style.display = 'none'; return; }
-
-            const m = db.clientes.filter(c => c.cedula.includes(val));
-            if(m.length > 0) {
-                res.innerHTML = m.map(c => `
-                    <div class="result-item" onclick="confirmarCliente('${c.cedula}')">
-                        <i class="fas fa-user"></i> ${c.nombre} (ID: ${c.cedula})
-                    </div>
-                `).join('');
-                res.style.display = 'block';
-            } else {
-                res.innerHTML = `<div class="result-item" onclick="tab('clientes')">❌ No existe. Clic para registrar</div>`;
-                res.style.display = 'block';
-            }
-        }
-
-        function confirmarCliente(cedula) {
-            const c = db.clientes.find(x => x.cedula === cedula);
-            db.clienteSeleccionado = c;
-            document.getElementById('res-cli').style.display = 'none';
-            document.getElementById('input-cedula').value = c.cedula;
-            
-            document.getElementById('info-cliente-confirmado').style.display = 'block';
-            document.getElementById('v-nombre').innerText = c.nombre;
-            document.getElementById('v-tel').innerText = "Telf: " + c.tel;
-            document.getElementById('v-dir').innerText = "Dir: " + c.dir;
-        }
-
-        // --- LÓGICA DE BÚSQUEDA DE PRODUCTO ---
-        function buscarProductoPredictivo(val) {
+        // --- BUSQUEDAS PREDICTIVAS ---
+        function searchProd(val) {
             const res = document.getElementById('res-prod');
-            if(val.length < 1) { res.style.display = 'none'; return; }
-
-            const m = db.productos.filter(p => 
-                p.nombre.toLowerCase().includes(val.toLowerCase()) || 
-                p.marca.toLowerCase().includes(val.toLowerCase())
-            );
-
-            if(m.length > 0) {
-                res.innerHTML = m.map(p => `
-                    <div class="result-item" onclick="agregarAlCarrito(${p.id})">
-                        <b>${p.nombre}</b> - <small>${p.marca}</small> 
-                        <span style="float:right; color:var(--accent)">$${p.precio} (Stock: ${p.stock})</span>
-                    </div>
-                `).join('');
-                res.style.display = 'block';
-            } else {
-                res.style.display = 'none';
-            }
+            if(!val) { res.style.display = 'none'; return; }
+            const matches = db.productos.filter(p => p.nom.toLowerCase().includes(val.toLowerCase()) || p.mar.toLowerCase().includes(val.toLowerCase()));
+            res.innerHTML = matches.map(p => `<div class="item-res" onclick="addToCart(${p.id})"><b>${p.nom}</b> (${p.mar}) - $${p.pre} <small>[Stock: ${p.sto}]</small></div>`).join('');
+            res.style.display = matches.length ? 'block' : 'none';
         }
 
-        function agregarAlCarrito(id) {
+        function searchCli(val) {
+            const res = document.getElementById('res-cli');
+            if(!val) { res.style.display = 'none'; return; }
+            const matches = db.clientes.filter(c => c.id.includes(val));
+            res.innerHTML = matches.map(c => `<div class="item-res" onclick="setCli('${c.id}')">${c.nom} (${c.id})</div>`).join('');
+            res.style.display = matches.length ? 'block' : 'none';
+        }
+
+        function setCli(id) {
+            db.cliActivo = db.clientes.find(c => c.id === id);
+            document.getElementById('cli-info').innerText = `✅ CLIENTE: ${db.cliActivo.nom}`;
+            document.getElementById('res-cli').style.display = 'none';
+            document.getElementById('c-search').value = id;
+        }
+
+        // --- CARRITO ---
+        function addToCart(id) {
             const p = db.productos.find(x => x.id === id);
-            if(p.stock <= 0) return alert("¡Sin existencias!");
-
-            const item = db.carrito.find(x => x.id === id);
-            if(item) item.cant++;
-            else db.carrito.push({...p, cant: 1});
-
+            if(p.sto <= 0) return alert("Sin stock");
+            const exist = db.carrito.find(x => x.id === id);
+            if(exist) exist.cant++; else db.carrito.push({...p, cant: 1});
             document.getElementById('res-prod').style.display = 'none';
-            document.getElementById('input-prod').value = '';
-            renderCarrito();
+            document.getElementById('p-search').value = '';
+            renderCart();
         }
 
-        function renderCarrito() {
-            const t = document.getElementById('cart-items');
-            t.innerHTML = '';
+        function renderCart() {
+            const body = document.getElementById('cart-body');
+            body.innerHTML = '';
             let total = 0;
-            db.carrito.forEach((item, i) => {
-                const sub = item.precio * item.cant;
-                total += sub;
-                t.innerHTML += `
-                    <tr>
-                        <td>${item.nombre} <br><small>${item.marca}</small></td>
-                        <td>${item.cant}</td>
-                        <td>$${item.precio}</td>
-                        <td>$${sub.toFixed(2)}</td>
-                        <td><i class="fas fa-trash" style="color:var(--danger); cursor:pointer" onclick="db.carrito.splice(${i},1);renderCarrito()"></i></td>
-                    </tr>
-                `;
+            db.carrito.forEach((item, idx) => {
+                total += (item.pre * item.cant);
+                body.innerHTML += `<tr><td>${item.nom}<br><small>${item.mar}</small></td><td>${item.cant}</td><td>$${item.pre}</td><td>$${(item.pre*item.cant).toFixed(2)}</td><td><i class="fas fa-trash" style="color:var(--danger)" onclick="db.carrito.splice(${idx},1);renderCart()"></i></td></tr>`;
             });
-            document.getElementById('v-total').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
         }
 
-        // --- GUARDADO DE DATOS ---
-        function guardarCliente() {
-            const c = {
-                cedula: document.getElementById('reg-cedula').value,
-                nombre: document.getElementById('reg-nombre').value,
-                tel: document.getElementById('reg-tel').value,
-                dir: document.getElementById('reg-dir').value
+        // --- FINALIZAR VENTA ---
+        function finishSale() {
+            if(!db.cliActivo) return alert("Seleccione un cliente");
+            if(db.carrito.length === 0) return alert("Carrito vacío");
+
+            const venta = {
+                fecha: new Date().toLocaleString(),
+                cliente: db.cliActivo.nom,
+                metodo: document.getElementById('pay-method').value,
+                total: document.getElementById('cart-total').innerText
             };
-            db.clientes.push(c);
-            localStorage.setItem('g_cli', JSON.stringify(db.clientes));
-            alert("Cliente afiliado correctamente");
-            tab('pos');
-        }
 
-        function guardarProducto() {
-            const p = {
-                id: Date.now(),
-                nombre: document.getElementById('p-nombre').value,
-                marca: document.getElementById('p-marca').value,
-                precio: parseFloat(document.getElementById('p-precio').value),
-                stock: parseInt(document.getElementById('p-stock').value)
-            };
-            db.productos.push(p);
-            localStorage.setItem('g_pro', JSON.stringify(db.productos));
-            alert("Producto añadido al sistema");
-            document.getElementById('p-nombre').value = '';
-        }
-
-        function procesarPago() {
-            if(db.carrito.length === 0) return alert("El carrito está vacío");
-            if(!db.clienteSeleccionado) return alert("Debe seleccionar un cliente antes de cobrar");
-
-            // Descontar stock real
-            db.carrito.forEach(c => {
-                const p = db.productos.find(x => x.id === c.id);
-                p.stock -= c.cant;
+            db.carrito.forEach(item => {
+                const p = db.productos.find(x => x.id === item.id);
+                p.sto -= item.cant;
             });
 
-            localStorage.setItem('g_pro', JSON.stringify(db.productos));
-            alert("Venta procesada con éxito para: " + db.clienteSeleccionado.nombre);
+            db.ventas.push(venta);
             db.carrito = [];
-            db.clienteSeleccionado = null;
-            location.reload(); // Reiniciar para nueva venta
+            db.cliActivo = null;
+            save();
+            alert("Venta procesada con éxito");
+            location.reload();
         }
+
+        // --- CRUD BÁSICO ---
+        function addCli() {
+            db.clientes.push({id: document.getElementById('reg-id').value, nom: document.getElementById('reg-nom').value, tel: document.getElementById('reg-tel').value, dir: document.getElementById('reg-dir').value});
+            save(); alert("Cliente afiliado"); tab('pos');
+        }
+
+        function addProd() {
+            db.productos.push({id: Date.now(), nom: document.getElementById('ip-nom').value, mar: document.getElementById('ip-mar').value, pre: parseFloat(document.getElementById('ip-pre').value), sto: parseInt(document.getElementById('ip-sto').value)});
+            save(); alert("Producto cargado"); tab('pos');
+        }
+
+        function save() {
+            localStorage.setItem('v6_cli', JSON.stringify(db.clientes));
+            localStorage.setItem('v6_pro', JSON.stringify(db.productos));
+            localStorage.setItem('v6_ven', JSON.stringify(db.ventas));
+        }
+
+        function renderReport() {
+            document.getElementById('sales-report-body').innerHTML = db.ventas.map(v => `<tr><td>${v.fecha}</td><td>${v.cliente}</td><td>${v.metodo}</td><td>${v.total}</td></tr>`).join('');
+        }
+
+        // --- EXPORTAR A EXCEL ---
+        function exportExcel() {
+            let csv = "Fecha/Hora,Cliente,Metodo de Pago,Total\n";
+            db.ventas.forEach(v => {
+                csv += `${v.fecha},${v.cliente},${v.metodo},${v.total.replace('$','')}\n`;
+            });
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Consolidado_Ventas_${new Date().toLocaleDateString()}.csv`;
+            a.click();
+        }
+
+        renderReport();
     </script>
 </body>
 </html>
