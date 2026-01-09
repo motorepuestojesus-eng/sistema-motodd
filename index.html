@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA POS ELITE v17</title>
+    <title>SISTEMA POS v18 - REGISTRO COMPLETO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -22,83 +22,84 @@
         .page.active { display: block; }
 
         .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 25px; position: relative; }
-        input, select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; margin-top: 5px; }
         
         .results-box { position: absolute; top: 100%; left: 0; right: 0; background: #2d3748; border: 2px solid var(--accent); z-index: 1000; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; }
         .res-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #334155; color: white; }
         .res-item:hover { background: var(--accent); color: #000; }
 
-        /* Alerta de Nuevo Cliente Proactiva */
-        .new-cli-area { background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger); padding: 15px; border-radius: 10px; margin-top: 10px; display: none; flex-direction: column; gap: 10px; }
-        
-        #quick-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-box { background: var(--card); padding: 30px; border-radius: 20px; width: 420px; border: 1px solid var(--accent); box-shadow: 0 0 30px rgba(56, 189, 248, 0.2); }
+        /* Modal Registro Completo */
+        #quick-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-box { background: var(--card); padding: 30px; border-radius: 20px; width: 450px; border: 1px solid var(--accent); }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px 10px; color: var(--muted); border-bottom: 2px solid #334155; }
-        td { padding: 15px 10px; border-bottom: 1px solid #334155; }
+        th { text-align: left; padding: 12px; color: var(--muted); border-bottom: 2px solid #334155; }
+        td { padding: 12px; border-bottom: 1px solid #334155; }
 
-        .total-display { text-align: center; padding: 25px; background: #0f172a; border-radius: 15px; border: 2px solid #334155; }
-        .val-usd { font-size: 3.5rem; font-weight: 800; color: var(--accent); }
-        .val-bs { font-size: 1.8rem; color: var(--success); margin-top: 10px; border-top: 1px dashed #334155; padding-top: 10px; }
-
+        .total-display { text-align: center; padding: 20px; background: #0f172a; border-radius: 15px; border: 2px solid #334155; }
         .btn-action { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; margin-top: 20px; }
-        #badge-cliente { margin-top: 15px; padding: 15px; border-radius: 10px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success); display: none; }
     </style>
 </head>
 <body>
 
     <div id="quick-modal">
         <div class="modal-box">
-            <h2 style="margin-bottom:10px; color:var(--accent)">Nuevo Cliente</h2>
-            <p style="color:var(--muted); margin-bottom:20px; font-size:0.9rem">Cédula no encontrada. Regístrela ahora:</p>
-            <label>Cédula</label>
-            <input type="text" id="q-ced" readonly style="background:#334155">
+            <h2 style="color:var(--accent); margin-bottom:15px">Registrar Nuevo Cliente</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div><label>Cédula</label><input type="text" id="q-ced" readonly></div>
+                <div><label>Teléfono</label><input type="text" id="q-tel" placeholder="0412-0000000"></div>
+            </div>
             <label style="margin-top:15px; display:block">Nombre Completo</label>
-            <input type="text" id="q-nom" placeholder="Ej. Juan Perez" autofocus>
-            <button class="btn-action" onclick="saveQuickCli()">GUARDAR Y CONTINUAR (ENTER)</button>
+            <input type="text" id="q-nom" placeholder="Juan Pérez">
+            <label style="margin-top:15px; display:block">Dirección</label>
+            <textarea id="q-dir" rows="2" placeholder="Ciudad, Sector..."></textarea>
+            
+            <button class="btn-action" onclick="saveQuickCli()">GUARDAR Y VINCULAR (ENTER)</button>
         </div>
     </div>
 
     <nav class="sidebar">
         <div class="logo">GLOBAL POS</div>
-        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-cash-register"></i> Ventas</button>
-        <button class="nav-btn" onclick="tab('rep')"><i class="fas fa-file-invoice"></i> Consolidado</button>
+        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-shopping-cart"></i> Ventas</button>
+        <button class="nav-btn" onclick="tab('inv')"><i class="fas fa-box"></i> Productos</button>
+        <button class="nav-btn" onclick="tab('rep')"><i class="fas fa-list-alt"></i> Reportes</button>
     </nav>
 
     <main class="main">
         <div id="tab-pos" class="page active">
             <div style="display: grid; grid-template-columns: 1fr 420px; gap: 30px;">
+                
                 <div>
                     <div class="card" style="display: flex; gap: 20px; align-items: flex-end;">
-                        <div style="width: 140px;"><label>Tasa BCV</label><input type="number" id="tasa-v" value="36.50" step="0.01"></div>
-                        <div style="flex: 1; position: relative;"><label>Añadir Producto (Enter)</label><input type="text" id="p-input" placeholder="Buscar..." autocomplete="off"><div id="p-res" class="results-box" style="display:none;"></div></div>
+                        <div style="width: 120px;"><label>Tasa BCV</label><input type="number" id="tasa-v" value="36.50"></div>
+                        <div style="flex: 1; position: relative;">
+                            <label>Agregar Producto</label>
+                            <input type="text" id="p-input" placeholder="Nombre del producto..." autocomplete="off">
+                            <div id="p-res" class="results-box" style="display:none;"></div>
+                        </div>
                     </div>
-                    <div class="card"><table><thead><tr><th>Item</th><th>Cant</th><th>Precio</th><th>Total</th><th></th></tr></thead><tbody id="cart-list"></tbody></table></div>
+
+                    <div class="card">
+                        <table id="cart-table">
+                            <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+                            <tbody id="cart-list"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div>
                     <div class="card">
-                        <label>Cédula del Cliente</label>
-                        <div style="position: relative;">
-                            <input type="text" id="c-input" placeholder="Ingrese Cédula..." autocomplete="off">
-                            <div id="c-res" class="results-box" style="display:none;"></div>
-                        </div>
-
-                        <div id="new-cli-area" class="new-cli-area">
-                            <span style="color:var(--danger); font-weight:bold; font-size:0.8rem">⚠️ NO REGISTRADO</span>
-                            <button onclick="openQuickModal()" style="background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold">REGISTRAR CLIENTE (+)</button>
-                        </div>
+                        <label>Cédula Cliente</label>
+                        <input type="text" id="c-input" placeholder="Ej: 33854892" autocomplete="off">
                         
-                        <div id="badge-cliente">
-                            <div style="color: var(--success); font-size: 0.7rem; font-weight: bold;">ENLAZADO</div>
-                            <h3 id="c-nombre-display" style="margin: 5px 0; color: white;">---</h3>
-                            <small id="c-cedula-display" style="color: var(--muted);">---</small>
+                        <div id="badge-cliente" style="margin-top:15px; padding:15px; border-radius:10px; background:rgba(16, 185, 129, 0.1); border:1px solid var(--success); display:none;">
+                            <b id="c-nom-show" style="display:block; color:white">---</b>
+                            <small id="c-det-show" style="color:var(--muted)">---</small>
                         </div>
                     </div>
 
                     <div class="card">
-                        <label>Método de Pago</label>
+                        <label>Pago</label>
                         <select id="p-metodo" onchange="calcTotal()">
                             <option value="Divisa">Divisa ($)</option>
                             <option value="Efectivo Bs">Efectivo Bs.</option>
@@ -106,31 +107,40 @@
                             <option value="Pago Movil">Pago Móvil</option>
                         </select>
                         <div class="total-display" style="margin-top:20px;">
-                            <div class="val-usd" id="t-usd">$0.00</div>
-                            <div id="t-bs" class="val-bs" style="display:none;">0.00 Bs.</div>
+                            <h1 id="t-usd" style="color:var(--accent); font-size:3rem">$0.00</h1>
+                            <h2 id="t-bs" style="color:var(--success); display:none;">0.00 Bs.</h2>
                         </div>
-                        <button class="btn-action" onclick="finalizarVenta()">FINALIZAR VENTA (ENTER)</button>
+                        <button class="btn-action" onclick="finalizarVenta()">PROCESAR VENTA</button>
                     </div>
                 </div>
             </div>
         </div>
 
+        <div id="tab-inv" class="page">
+            <div class="card" style="max-width:500px; margin:auto">
+                <h2>Nuevo Producto</h2>
+                <input type="text" id="pn" placeholder="Nombre">
+                <input type="number" id="pp" placeholder="Precio $">
+                <button class="btn-action" onclick="savePro()">GUARDAR PRODUCTO</button>
+            </div>
+        </div>
+
         <div id="tab-rep" class="page">
             <div class="card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                    <h2>Consolidado Detallado</h2>
-                    <button onclick="exportExcel()" style="padding:10px 20px; background:#1d6f42; color:white; border:none; border-radius:8px; cursor:pointer; font-weight: bold;">EXPORTAR EXCEL</button>
-                </div>
-                <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Metodo</th><th>Total $</th><th>Total Bs</th></tr></thead><tbody id="rep-body"></tbody></table>
+                <h2>Ventas del Día</h2>
+                <table style="margin-top:20px">
+                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Total $</th><th>Pago</th></tr></thead>
+                    <tbody id="rep-body"></tbody>
+                </table>
             </div>
         </div>
     </main>
 
     <script>
         let db = {
-            cli: JSON.parse(localStorage.getItem('pos_v17_cli')) || [],
-            pro: JSON.parse(localStorage.getItem('pos_v17_pro')) || [],
-            ven: JSON.parse(localStorage.getItem('pos_v17_ven')) || [],
+            cli: JSON.parse(localStorage.getItem('v18_cli')) || [],
+            pro: JSON.parse(localStorage.getItem('v18_pro')) || [],
+            ven: JSON.parse(localStorage.getItem('v18_ven')) || [],
             cart: [], cliAct: null, totalUSD: 0
         };
 
@@ -142,77 +152,54 @@
             if(id==='rep') renderRep();
         }
 
-        // --- LÓGICA DE CÉDULA PROACTIVA ---
+        // --- CLIENTE ---
         const cIn = document.getElementById('c-input');
-        const cArea = document.getElementById('new-cli-area');
-
-        cIn.addEventListener('input', () => {
-            const val = cIn.value.trim();
-            const box = document.getElementById('c-res');
-            cArea.style.display = 'none';
-            document.getElementById('badge-cliente').style.display = 'none';
-            
-            if(!val) { box.style.display='none'; return; }
-            
-            const matches = db.cli.filter(c => c.ced.includes(val));
-            
-            if(matches.length > 0) {
-                box.innerHTML = matches.map(c => `<div class="res-item" onclick="vincular('${c.ced}')">${c.ced} - ${c.nom}</div>`).join('');
-                box.style.display = 'block';
-            } else {
-                box.style.display = 'none';
-                if(val.length >= 1) cArea.style.display = 'flex'; // Muestra opción de agregar si no hay nada
-            }
-        });
-
         cIn.addEventListener('keydown', (e) => {
             if(e.key === 'Enter') {
                 const val = cIn.value.trim();
                 const match = db.cli.find(c => c.ced === val);
                 if(match) {
-                    vincular(match.ced);
+                    vincular(match);
                     document.getElementById('p-input').focus();
-                } else if(val !== "") {
-                    openQuickModal(); // Enter automático al modal si no existe
+                } else {
+                    document.getElementById('q-ced').value = val;
+                    document.getElementById('quick-modal').style.display = 'flex';
+                    document.getElementById('q-nom').focus();
                 }
             }
         });
 
-        function vincular(ced) {
-            db.cliAct = db.cli.find(c => c.ced === ced);
-            document.getElementById('c-input').value = ced;
-            document.getElementById('c-nombre-display').innerText = db.cliAct.nom;
-            document.getElementById('c-cedula-display').innerText = "V-" + db.cliAct.ced;
-            document.getElementById('badge-cliente').style.display = 'block';
-            document.getElementById('c-res').style.display = 'none';
-            cArea.style.display = 'none';
-        }
-
-        function openQuickModal() {
-            document.getElementById('q-ced').value = cIn.value;
-            document.getElementById('quick-modal').style.display = 'flex';
-            document.getElementById('q-nom').focus();
-        }
-
         function saveQuickCli() {
-            const n = document.getElementById('q-nom').value;
-            const c = document.getElementById('q-ced').value;
-            if(!n) return alert("Ingrese el nombre");
-            db.cli.push({ ced: c, nom: n });
-            localStorage.setItem('pos_v17_cli', JSON.stringify(db.cli));
-            vincular(c);
+            const nuevo = {
+                ced: document.getElementById('q-ced').value,
+                nom: document.getElementById('q-nom').value,
+                tel: document.getElementById('q-tel').value,
+                dir: document.getElementById('q-dir').value
+            };
+            if(!nuevo.nom) return alert("Falta nombre");
+            db.cli.push(nuevo);
+            localStorage.setItem('v18_cli', JSON.stringify(db.cli));
+            vincular(nuevo);
             document.getElementById('quick-modal').style.display = 'none';
-            document.getElementById('p-input').focus();
         }
 
-        // --- PRODUCTOS Y TOTALES ---
+        function vincular(c) {
+            db.cliAct = c;
+            document.getElementById('badge-cliente').style.display = 'block';
+            document.getElementById('c-nom-show').innerText = c.nom;
+            document.getElementById('c-det-show').innerText = `Tlf: ${c.tel} | Dir: ${c.dir}`;
+        }
+
+        // --- PRODUCTOS ---
         const pIn = document.getElementById('p-input');
-        pIn.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') {
-                if(pIn.value === "" && db.cart.length > 0) { finalizarVenta(); return; }
-                const item = db.pro.find(p => p.nom.toLowerCase().includes(pIn.value.toLowerCase()));
-                if(item) { addCart(item.id); pIn.value = ""; }
-            }
+        const pBox = document.getElementById('p-res');
+
+        pIn.addEventListener('input', () => {
+            const val = pIn.value.toLowerCase();
+            if(!val) return pBox.style.display='none';
+            const matches = db.pro.filter(p => p.nom.toLowerCase().includes(val));
+            pBox.innerHTML = matches.map(p => `<div class="res-item" onclick="addCart(${p.id})">${p.nom} - $${p.pre}</div>`).join('');
+            pBox.style.display = matches.length ? 'block' : 'none';
         });
 
         function addCart(id) {
@@ -220,6 +207,7 @@
             const ex = db.cart.find(x => x.id === id);
             if(ex) ex.cant++; else db.cart.push({...p, cant: 1});
             renderCart();
+            pIn.value = ""; pBox.style.display='none';
         }
 
         function renderCart() {
@@ -227,7 +215,7 @@
             list.innerHTML = ''; db.totalUSD = 0;
             db.cart.forEach((item, idx) => {
                 const sub = item.pre * item.cant; db.totalUSD += sub;
-                list.innerHTML += `<tr><td>${item.nom}</td><td>${item.cant}</td><td>$${item.pre}</td><td>$${sub.toFixed(2)}</td><td><i class="fas fa-trash" onclick="drop(${idx})" style="color:var(--danger);cursor:pointer"></i></td></tr>`;
+                list.innerHTML += `<tr><td>${item.nom}</td><td>${item.cant}</td><td>$${item.pre}</td><td>$${sub.toFixed(2)}</td><td onclick="drop(${idx})"><i class="fas fa-times" style="color:red"></i></td></tr>`;
             });
             calcTotal();
         }
@@ -237,44 +225,25 @@
             const m = document.getElementById('p-metodo').value;
             document.getElementById('t-usd').innerText = `$${db.totalUSD.toFixed(2)}`;
             const bs = document.getElementById('t-bs');
-            if(m !== 'Divisa' && db.totalUSD > 0) {
+            if(m !== 'Divisa') {
                 bs.innerText = (db.totalUSD * t).toFixed(2) + " Bs.";
                 bs.style.display = 'block';
             } else bs.style.display = 'none';
         }
 
         function finalizarVenta() {
-            if(!db.cliAct || !db.cart.length) return alert("Falta Cliente o Carrito");
-            const t = parseFloat(document.getElementById('tasa-v').value);
-            const met = document.getElementById('p-metodo').value;
-            db.ven.push({
-                f: new Date().toLocaleString(),
-                c: db.cliAct.nom,
-                m: met,
-                u: db.totalUSD.toFixed(2),
-                b: (met === 'Divisa') ? "0.00" : (db.totalUSD * t).toFixed(2)
-            });
-            localStorage.setItem('pos_v17_ven', JSON.stringify(db.ven));
-            alert("Venta procesada con éxito.");
-            location.reload();
+            if(!db.cliAct || !db.cart.length) return alert("Faltan datos");
+            db.ven.push({ f: new Date().toLocaleString(), c: db.cliAct.nom, u: db.totalUSD.toFixed(2), m: document.getElementById('p-metodo').value });
+            localStorage.setItem('v18_ven', JSON.stringify(db.ven));
+            alert("Venta completada"); location.reload();
         }
 
+        function savePro() {
+            db.pro.push({ id: Date.now(), nom: document.getElementById('pn').value, pre: parseFloat(document.getElementById('pp').value) });
+            localStorage.setItem('v18_pro', JSON.stringify(db.pro)); alert("Producto guardado");
+        }
         function drop(i) { db.cart.splice(i,1); renderCart(); }
-        function renderRep() { document.getElementById('rep-body').innerHTML = db.ven.map(v => `<tr><td>${v.f}</td><td>${v.c}</td><td>${v.m}</td><td>$${v.u}</td><td>${v.b} Bs</td></tr>`).join(''); }
-        
-        function exportExcel() {
-            let csv = "\uFEFFFecha,Cliente,Metodo,Total USD,Total BS\n";
-            db.ven.forEach(v => csv += `"${v.f}","${v.c}","${v.m}","${v.u}","${v.b}"\n`);
-            const blob = new Blob([csv], {type: 'text/csv'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Reporte_Ventas_Completo.csv'; a.click();
-        }
-
-        // Listener para cerrar modal con ESC o Enter
-        window.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter' && document.getElementById('quick-modal').style.display === 'flex') {
-                saveQuickCli();
-            }
-        });
+        function renderRep() { document.getElementById('rep-body').innerHTML = db.ven.map(v => `<tr><td>${v.f}</td><td>${v.c}</td><td>$${v.u}</td><td>${v.m}</td></tr>`).join(''); }
     </script>
 </body>
 </html>
