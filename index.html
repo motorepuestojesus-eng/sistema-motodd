@@ -2,248 +2,303 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA POS v18 - REGISTRO COMPLETO</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Moto Repuestos Jesús - Sistema Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; 
-            --success: #10b981; --danger: #ef4444; --text: #f1f5f9; --muted: #94a3b8;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-
-        .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo { padding: 30px 20px; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-align: center; }
-        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; }
-        .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
-
-        .main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top right, #1e293b, #0f172a); }
+        body { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%); min-height: 100vh; font-family: 'Poppins', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .table-rainbow th { background: linear-gradient(90deg, #4f46e5, #ec4899); color: white; padding: 10px; font-size: 10px; text-transform: uppercase; }
+        .table-rainbow td { padding: 4px; border-bottom: 1px solid #f0f0f0; }
+        .input-glow:focus { background: rgba(79, 70, 229, 0.1); outline: none; box-shadow: inset 0 0 0 2px #4f46e5; border-radius: 4px; }
+        .card-red { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); }
+        .card-green { background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); }
+        .card-blue { background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%); }
+        input, select { background: transparent; text-align: center; outline: none; width: 100%; font-weight: 600; font-size: 13px; }
+        .tab-btn.active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: 800; }
         .page { display: none; }
         .page.active { display: block; }
-
-        .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 25px; position: relative; }
-        input, select, textarea { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; margin-top: 5px; }
-        
-        .results-box { position: absolute; top: 100%; left: 0; right: 0; background: #2d3748; border: 2px solid var(--accent); z-index: 1000; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; }
-        .res-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #334155; color: white; }
-        .res-item:hover { background: var(--accent); color: #000; }
-
-        /* Modal Registro Completo */
-        #quick-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-box { background: var(--card); padding: 30px; border-radius: 20px; width: 450px; border: 1px solid var(--accent); }
-
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: var(--muted); border-bottom: 2px solid #334155; }
-        td { padding: 12px; border-bottom: 1px solid #334155; }
-
-        .total-display { text-align: center; padding: 20px; background: #0f172a; border-radius: 15px; border: 2px solid #334155; }
-        .btn-action { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; margin-top: 20px; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="p-4 md:p-6">
 
-    <div id="quick-modal">
-        <div class="modal-box">
-            <h2 style="color:var(--accent); margin-bottom:15px">Registrar Nuevo Cliente</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div><label>Cédula</label><input type="text" id="q-ced" readonly></div>
-                <div><label>Teléfono</label><input type="text" id="q-tel" placeholder="0412-0000000"></div>
+    <div id="modalCli" class="fixed inset-0 bg-black/80 hidden z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-black text-indigo-900 mb-4">NUEVO CLIENTE</h2>
+            <div class="space-y-4">
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Cédula</label><input type="text" id="q-ced" readonly class="bg-gray-100 p-2 rounded-lg"></div>
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Nombre Completo</label><input type="text" id="q-nom" class="border-b-2 border-indigo-200 p-2 text-left"></div>
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Teléfono</label><input type="text" id="q-tel" class="border-b-2 border-indigo-200 p-2 text-left"></div>
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Dirección</label><input type="text" id="q-dir" class="border-b-2 border-indigo-200 p-2 text-left"></div>
+                <button onclick="guardarCliente()" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl shadow-lg mt-4 uppercase">Guardar Registro</button>
             </div>
-            <label style="margin-top:15px; display:block">Nombre Completo</label>
-            <input type="text" id="q-nom" placeholder="Juan Pérez">
-            <label style="margin-top:15px; display:block">Dirección</label>
-            <textarea id="q-dir" rows="2" placeholder="Ciudad, Sector..."></textarea>
-            
-            <button class="btn-action" onclick="saveQuickCli()">GUARDAR Y VINCULAR (ENTER)</button>
         </div>
     </div>
 
-    <nav class="sidebar">
-        <div class="logo">GLOBAL POS</div>
-        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-shopping-cart"></i> Ventas</button>
-        <button class="nav-btn" onclick="tab('inv')"><i class="fas fa-box"></i> Productos</button>
-        <button class="nav-btn" onclick="tab('rep')"><i class="fas fa-list-alt"></i> Reportes</button>
-    </nav>
-
-    <main class="main">
-        <div id="tab-pos" class="page active">
-            <div style="display: grid; grid-template-columns: 1fr 420px; gap: 30px;">
-                
-                <div>
-                    <div class="card" style="display: flex; gap: 20px; align-items: flex-end;">
-                        <div style="width: 120px;"><label>Tasa BCV</label><input type="number" id="tasa-v" value="36.50"></div>
-                        <div style="flex: 1; position: relative;">
-                            <label>Agregar Producto</label>
-                            <input type="text" id="p-input" placeholder="Nombre del producto..." autocomplete="off">
-                            <div id="p-res" class="results-box" style="display:none;"></div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <table id="cart-table">
-                            <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
-                            <tbody id="cart-list"></tbody>
-                        </table>
-                    </div>
+    <div class="max-w-[1500px] mx-auto glass shadow-2xl overflow-hidden">
+        
+        <div class="p-6 pb-0 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-indigo-900 italic uppercase tracking-tighter">Moto Repuestos Jesús</h1>
+                <div class="flex gap-6 mt-2">
+                    <button onclick="showPage('caja')" class="tab-btn active uppercase text-xs tracking-widest pb-2" id="btn-caja">Cuadre de Caja</button>
+                    <button onclick="showPage('inventario')" class="tab-btn uppercase text-xs tracking-widest pb-2" id="btn-inv">Inventario / Compras</button>
                 </div>
-
-                <div>
-                    <div class="card">
-                        <label>Cédula Cliente</label>
-                        <input type="text" id="c-input" placeholder="Ej: 33854892" autocomplete="off">
-                        
-                        <div id="badge-cliente" style="margin-top:15px; padding:15px; border-radius:10px; background:rgba(16, 185, 129, 0.1); border:1px solid var(--success); display:none;">
-                            <b id="c-nom-show" style="display:block; color:white">---</b>
-                            <small id="c-det-show" style="color:var(--muted)">---</small>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <label>Pago</label>
-                        <select id="p-metodo" onchange="calcTotal()">
-                            <option value="Divisa">Divisa ($)</option>
-                            <option value="Efectivo Bs">Efectivo Bs.</option>
-                            <option value="Punto">Punto de Venta</option>
-                            <option value="Pago Movil">Pago Móvil</option>
-                        </select>
-                        <div class="total-display" style="margin-top:20px;">
-                            <h1 id="t-usd" style="color:var(--accent); font-size:3rem">$0.00</h1>
-                            <h2 id="t-bs" style="color:var(--success); display:none;">0.00 Bs.</h2>
-                        </div>
-                        <button class="btn-action" onclick="finalizarVenta()">PROCESAR VENTA</button>
-                    </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="bg-indigo-600 p-2 rounded-xl text-white text-center shadow-lg">
+                    <span class="text-[9px] font-bold opacity-80 uppercase">Tasa BCV</span>
+                    <input type="number" id="tasa" step="0.01" value="54.20" class="text-xl font-black w-20 text-white" onchange="calcular()">
                 </div>
+                <button onclick="limpiarTodo()" class="bg-red-500 text-white px-4 py-2 rounded-xl font-black text-xs uppercase shadow-md hover:bg-red-600">
+                    <i class="fas fa-sync mr-1"></i> Reiniciar
+                </button>
             </div>
         </div>
 
-        <div id="tab-inv" class="page">
-            <div class="card" style="max-width:500px; margin:auto">
-                <h2>Nuevo Producto</h2>
-                <input type="text" id="pn" placeholder="Nombre">
-                <input type="number" id="pp" placeholder="Precio $">
-                <button class="btn-action" onclick="savePro()">GUARDAR PRODUCTO</button>
-            </div>
-        </div>
-
-        <div id="tab-rep" class="page">
-            <div class="card">
-                <h2>Ventas del Día</h2>
-                <table style="margin-top:20px">
-                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Total $</th><th>Pago</th></tr></thead>
-                    <tbody id="rep-body"></tbody>
+        <div id="page-caja" class="page active p-6">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 mb-6">
+                <table class="table-rainbow w-full">
+                    <thead>
+                        <tr>
+                            <th>Cédula (Enter)</th><th>Cliente</th><th>$ Efectivo</th><th>Bs Efectivo</th><th>Débito</th><th>Pago Móvil</th><th class="bg-pink-500">Sub-Total Bs</th><th class="bg-indigo-800">Total $</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoVentas"></tbody>
+                    <tfoot class="bg-indigo-50 font-black text-indigo-900">
+                        <tr id="pieVentas"></tr>
+                    </tfoot>
                 </table>
             </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="card-blue p-5 rounded-3xl shadow-md text-blue-900">
+                    <h3 class="font-black uppercase text-[10px] mb-3"><i class="fas fa-clock mr-2"></i> Cuentas por Cobrar</h3>
+                    <div class="space-y-2" id="seccionCuentas"></div>
+                    <div class="mt-3 pt-2 border-t border-blue-400 flex justify-between font-black text-xs">
+                        <span>DEUDA TOTAL:</span><span id="totalCuentas">0.00</span>
+                    </div>
+                </div>
+
+                <div class="card-red p-5 rounded-3xl shadow-md text-red-900">
+                    <h3 class="font-black uppercase text-[10px] mb-3 italic">Gastos / Egresos (Bs)</h3>
+                    <div class="space-y-2" id="seccionGastos"></div>
+                    <h3 class="font-black uppercase text-[10px] my-3 italic text-green-800 border-t border-red-300 pt-3">Otros Ingresos (Bs)</h3>
+                    <div class="space-y-2" id="seccionOtrosIngresos"></div>
+                    <div class="mt-3 pt-2 border-t border-red-300 flex justify-between font-black text-xs">
+                        <span>NETO (Bs):</span><span id="totalNetoOtros">0.00</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-6 rounded-3xl shadow-2xl flex flex-col items-center justify-center text-center text-white">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 mb-2 italic">Diferencia $ (Sistema vs Físico)</span>
+                    <div id="statusNum" class="text-6xl font-black mb-1">0.00</div>
+                    <div id="statusTxt" class="text-[10px] font-bold uppercase italic text-gray-400">Cuadrando...</div>
+                    
+                    <div class="mt-4 w-full bg-indigo-950 p-3 rounded-2xl border border-indigo-800">
+                        <h4 class="text-[9px] font-bold text-indigo-300 uppercase mb-2 italic">Conteo Billetes Físico $</h4>
+                        <div id="billetes" class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]"></div>
+                        <div class="mt-2 pt-2 border-t border-indigo-800 flex justify-between text-xs font-black">
+                            <span>TOTAL FÍSICO:</span><span id="resFisico" class="text-indigo-300">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </main>
+
+        <div id="page-inventario" class="page p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 col-span-1">
+                    <h2 class="font-black text-indigo-900 uppercase mb-4 tracking-tighter italic">Agregar Producto</h2>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-bold text-gray-400">PROVEEDOR</label>
+                        <input type="text" id="i-prov" class="bg-gray-50 p-2 rounded-lg text-left" placeholder="Ej: Importadora X">
+                        <label class="text-[10px] font-bold text-gray-400">MARCA</label>
+                        <input type="text" id="i-marca" class="bg-gray-50 p-2 rounded-lg text-left" placeholder="Ej: Yamaha">
+                        <label class="text-[10px] font-bold text-gray-400">MODELO</label>
+                        <input type="text" id="i-modelo" class="bg-gray-50 p-2 rounded-lg text-left" placeholder="Ej: BWS 125">
+                        <label class="text-[10px] font-bold text-gray-400">PRECIO VENTA $</label>
+                        <input type="number" id="i-precio" class="bg-indigo-50 p-2 rounded-lg text-indigo-600 font-black" placeholder="0.00">
+                        <button onclick="guardarProducto()" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl shadow-lg uppercase text-xs">Guardar en Sistema</button>
+                    </div>
+                </div>
+                <div class="col-span-2 bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                    <table class="table-rainbow w-full">
+                        <thead><tr><th>Marca</th><th>Modelo</th><th>Precio $</th><th>Proveedor</th><th>Acción</th></tr></thead>
+                        <tbody id="listaInv"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let db = {
-            cli: JSON.parse(localStorage.getItem('v18_cli')) || [],
-            pro: JSON.parse(localStorage.getItem('v18_pro')) || [],
-            ven: JSON.parse(localStorage.getItem('v18_ven')) || [],
-            cart: [], cliAct: null, totalUSD: 0
+        // DB Inicial con Clientes y Productos añadidos
+        let app = JSON.parse(localStorage.getItem('moto_jesus_pro')) || {
+            caja: { 
+                filas: Array(10).fill().map(() => ({ced:'', cli:'', usd:0, bsE:0, deb:0, pm:0})),
+                cuentas: Array(4).fill().map(() => ({desc:'', monto:0})),
+                gastos: Array(4).fill().map(() => ({desc:'', monto:0})),
+                ingresos: Array(3).fill().map(() => ({desc:'', monto:0})),
+                billetes: {100:0, 50:0, 20:0, 10:0, 5:0, 2:0, 1:0}
+            },
+            clientes: [],
+            productos: []
         };
 
-        function tab(id) {
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            event.currentTarget.classList.add('active');
-            if(id==='rep') renderRep();
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+            document.getElementById('btn-'+(id==='caja'?'caja':'inv')).classList.add('active');
+            if(id === 'inventario') renderInv();
         }
 
-        // --- CLIENTE ---
-        const cIn = document.getElementById('c-input');
-        cIn.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') {
-                const val = cIn.value.trim();
-                const match = db.cli.find(c => c.ced === val);
-                if(match) {
-                    vincular(match);
-                    document.getElementById('p-input').focus();
-                } else {
-                    document.getElementById('q-ced').value = val;
-                    document.getElementById('quick-modal').style.display = 'flex';
-                    document.getElementById('q-nom').focus();
-                }
+        // --- LÓGICA DE CÉDULA ---
+        function checkCed(i, val) {
+            if(!val) return;
+            // VALIDACIÓN ESTRICTA 7-8 DÍGITOS
+            if(val.length < 7 || val.length > 8) {
+                alert("La cédula debe tener entre 7 y 8 números.");
+                app.caja.filas[i].ced = "";
+                calcular();
+                return;
             }
-        });
 
-        function saveQuickCli() {
-            const nuevo = {
-                ced: document.getElementById('q-ced').value,
-                nom: document.getElementById('q-nom').value,
+            const cliente = app.clientes.find(c => c.ced === val);
+            if(cliente) {
+                app.caja.filas[i].cli = cliente.nom;
+                calcular();
+            } else {
+                document.getElementById('q-ced').value = val;
+                document.getElementById('modalCli').dataset.index = i;
+                document.getElementById('modalCli').classList.remove('hidden');
+                document.getElementById('modalCli').classList.add('flex');
+            }
+        }
+
+        function guardarCliente() {
+            const nom = document.getElementById('q-nom').value;
+            const ced = document.getElementById('q-ced').value;
+            const idx = document.getElementById('modalCli').dataset.index;
+            
+            if(!nom) return alert("Falta el nombre");
+            
+            app.clientes.push({
+                ced: ced,
+                nom: nom,
                 tel: document.getElementById('q-tel').value,
                 dir: document.getElementById('q-dir').value
-            };
-            if(!nuevo.nom) return alert("Falta nombre");
-            db.cli.push(nuevo);
-            localStorage.setItem('v18_cli', JSON.stringify(db.cli));
-            vincular(nuevo);
-            document.getElementById('quick-modal').style.display = 'none';
-        }
-
-        function vincular(c) {
-            db.cliAct = c;
-            document.getElementById('badge-cliente').style.display = 'block';
-            document.getElementById('c-nom-show').innerText = c.nom;
-            document.getElementById('c-det-show').innerText = `Tlf: ${c.tel} | Dir: ${c.dir}`;
-        }
-
-        // --- PRODUCTOS ---
-        const pIn = document.getElementById('p-input');
-        const pBox = document.getElementById('p-res');
-
-        pIn.addEventListener('input', () => {
-            const val = pIn.value.toLowerCase();
-            if(!val) return pBox.style.display='none';
-            const matches = db.pro.filter(p => p.nom.toLowerCase().includes(val));
-            pBox.innerHTML = matches.map(p => `<div class="res-item" onclick="addCart(${p.id})">${p.nom} - $${p.pre}</div>`).join('');
-            pBox.style.display = matches.length ? 'block' : 'none';
-        });
-
-        function addCart(id) {
-            const p = db.pro.find(x => x.id === id);
-            const ex = db.cart.find(x => x.id === id);
-            if(ex) ex.cant++; else db.cart.push({...p, cant: 1});
-            renderCart();
-            pIn.value = ""; pBox.style.display='none';
-        }
-
-        function renderCart() {
-            const list = document.getElementById('cart-list');
-            list.innerHTML = ''; db.totalUSD = 0;
-            db.cart.forEach((item, idx) => {
-                const sub = item.pre * item.cant; db.totalUSD += sub;
-                list.innerHTML += `<tr><td>${item.nom}</td><td>${item.cant}</td><td>$${item.pre}</td><td>$${sub.toFixed(2)}</td><td onclick="drop(${idx})"><i class="fas fa-times" style="color:red"></i></td></tr>`;
             });
-            calcTotal();
+            
+            app.caja.filas[idx].cli = nom;
+            app.caja.filas[idx].ced = ced;
+            
+            document.getElementById('modalCli').classList.add('hidden');
+            document.getElementById('q-nom').value = "";
+            calcular();
         }
 
-        function calcTotal() {
-            const t = parseFloat(document.getElementById('tasa-v').value);
-            const m = document.getElementById('p-metodo').value;
-            document.getElementById('t-usd').innerText = `$${db.totalUSD.toFixed(2)}`;
-            const bs = document.getElementById('t-bs');
-            if(m !== 'Divisa') {
-                bs.innerText = (db.totalUSD * t).toFixed(2) + " Bs.";
-                bs.style.display = 'block';
-            } else bs.style.display = 'none';
+        // --- LÓGICA DE PRODUCTOS ---
+        function guardarProducto() {
+            const mar = document.getElementById('i-marca').value;
+            const mod = document.getElementById('i-modelo').value;
+            const pre = parseFloat(document.getElementById('i-precio').value);
+            
+            if(!mar || !mod || isNaN(pre)) return alert("Llene los datos del producto");
+            
+            app.productos.push({
+                mar, mod, pre, prov: document.getElementById('i-prov').value
+            });
+            renderInv();
+            document.getElementById('i-marca').value = "";
+            document.getElementById('i-modelo').value = "";
+            document.getElementById('i-precio').value = "";
+            localStorage.setItem('moto_jesus_pro', JSON.stringify(app));
         }
 
-        function finalizarVenta() {
-            if(!db.cliAct || !db.cart.length) return alert("Faltan datos");
-            db.ven.push({ f: new Date().toLocaleString(), c: db.cliAct.nom, u: db.totalUSD.toFixed(2), m: document.getElementById('p-metodo').value });
-            localStorage.setItem('v18_ven', JSON.stringify(db.ven));
-            alert("Venta completada"); location.reload();
+        function renderInv() {
+            const tbody = document.getElementById('listaInv');
+            tbody.innerHTML = app.productos.map((p, i) => `
+                <tr>
+                    <td class="text-center font-bold">${p.mar}</td>
+                    <td class="text-center">${p.mod}</td>
+                    <td class="text-center text-indigo-600 font-black">$${p.pre.toFixed(2)}</td>
+                    <td class="text-center text-gray-400 text-[10px]">${p.prov}</td>
+                    <td class="text-center"><button onclick="delPro(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
         }
 
-        function savePro() {
-            db.pro.push({ id: Date.now(), nom: document.getElementById('pn').value, pre: parseFloat(document.getElementById('pp').value) });
-            localStorage.setItem('v18_pro', JSON.stringify(db.pro)); alert("Producto guardado");
+        // --- CÁLCULOS GENERALES ---
+        function calcular() {
+            const tasa = parseFloat(document.getElementById('tasa').value) || 1;
+            let tUsd=0, tBs=0, tFUsd=0;
+            const tb = document.getElementById('cuerpoVentas'); tb.innerHTML = "";
+            
+            app.caja.filas.forEach((f, i) => {
+                const filaBs = (f.bsE||0)+(f.deb||0)+(f.pm||0);
+                const totalF = (f.usd||0) + (filaBs / tasa);
+                tUsd += (f.usd||0); tBs += filaBs; tFUsd += totalF;
+                
+                tb.innerHTML += `<tr>
+                    <td><input class="input-glow" type="number" value="${f.ced}" onchange="upd(${i},'ced',this.value); checkCed(${i},this.value)"></td>
+                    <td><input class="input-glow text-left px-2" value="${f.cli}" readonly></td>
+                    <td><input class="input-glow text-blue-600 font-bold" type="number" value="${f.usd||''}" onchange="upd(${i},'usd',parseFloat(this.value))"></td>
+                    <td><input class="input-glow" type="number" value="${f.bsE||''}" onchange="upd(${i},'bsE',parseFloat(this.value))"></td>
+                    <td><input class="input-glow" type="number" value="${f.deb||''}" onchange="upd(${i},'deb',parseFloat(this.value))"></td>
+                    <td><input class="input-glow" type="number" value="${f.pm||''}" onchange="upd(${i},'pm',parseFloat(this.value))"></td>
+                    <td class="font-bold text-pink-600 text-center">${filaBs.toFixed(2)}</td>
+                    <td class="font-black text-indigo-700 text-center">${totalF.toFixed(2)}</td>
+                </tr>`;
+            });
+            document.getElementById('pieVentas').innerHTML = `<td colspan="2" class="p-2">TOTALES</td><td>${tUsd.toFixed(2)}</td><td colspan="3"></td><td>${tBs.toLocaleString()}</td><td>${tFUsd.toFixed(2)}</td>`;
+
+            // Cuentas, Gastos, Billetes (Igual que el original)
+            let tCuentas = 0; const sc = document.getElementById('seccionCuentas'); sc.innerHTML = "";
+            app.caja.cuentas.forEach((c, i) => {
+                tCuentas += (c.monto||0);
+                sc.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${c.desc}" onchange="updExtra('cuentas',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${c.monto||''}" onchange="updExtra('cuentas',${i},'monto',parseFloat(this.value))"></div>`;
+            });
+            document.getElementById('totalCuentas').innerText = tCuentas.toFixed(2);
+
+            let tGastos = 0; const sg = document.getElementById('seccionGastos'); sg.innerHTML = "";
+            app.caja.gastos.forEach((g, i) => {
+                tGastos += (g.monto||0);
+                sg.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${g.desc}" onchange="updExtra('gastos',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${g.monto||''}" onchange="updExtra('gastos',${i},'monto',parseFloat(this.value))"></div>`;
+            });
+
+            let tIng = 0; const si = document.getElementById('seccionOtrosIngresos'); si.innerHTML = "";
+            app.caja.ingresos.forEach((n, i) => {
+                tIng += (n.monto||0);
+                si.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${n.desc}" onchange="updExtra('ingresos',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${n.monto||''}" onchange="updExtra('ingresos',${i},'monto',parseFloat(this.value))"></div>`;
+            });
+            document.getElementById('totalNetoOtros').innerText = (tIng - tGastos).toLocaleString();
+
+            let tMano = 0; const sb = document.getElementById('billetes'); sb.innerHTML = "";
+            [100, 50, 20, 10, 5, 2, 1].forEach(d => {
+                const c = app.caja.billetes[d] || 0; tMano += (c * d);
+                sb.innerHTML += `<div class="flex justify-between border-b border-indigo-900/30"><span>${d}$</span><input type="number" class="w-8 text-white font-black" value="${c||''}" onchange="updB(${d},parseInt(this.value))"></div>`;
+            });
+            document.getElementById('resFisico').innerText = tMano.toFixed(2);
+
+            const diff = tMano - tUsd;
+            document.getElementById('statusNum').innerText = Math.abs(diff).toFixed(2);
+            document.getElementById('statusTxt').innerText = Math.abs(diff) < 0.01 ? "CUADRADO ✅" : (diff > 0 ? "SOBRANTE ⚠️" : "FALTANTE ❌");
+            document.getElementById('statusNum').className = "text-6xl font-black mb-1 " + (Math.abs(diff) < 0.01 ? "text-green-400" : "text-red-400");
+
+            localStorage.setItem('moto_jesus_pro', JSON.stringify(app));
         }
-        function drop(i) { db.cart.splice(i,1); renderCart(); }
-        function renderRep() { document.getElementById('rep-body').innerHTML = db.ven.map(v => `<tr><td>${v.f}</td><td>${v.c}</td><td>$${v.u}</td><td>${v.m}</td></tr>`).join(''); }
+
+        function upd(i,k,v) { app.caja.filas[i][k] = v; calcular(); }
+        function updExtra(type,i,k,v) { app.caja[type][i][k] = v; calcular(); }
+        function updB(d,v) { app.caja.billetes[d] = v; calcular(); }
+        function delPro(i) { app.productos.splice(i,1); renderInv(); }
+        function limpiarTodo() { if(confirm("¿Borrar datos del día?")) { localStorage.removeItem('moto_jesus_pro'); location.reload(); } }
+
+        calcular();
     </script>
 </body>
 </html>
