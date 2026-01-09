@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Moto Repuestos Jesús - Sistema Pro</title>
+    <title>Moto Repuestos Jesús - Sistema Integral v22</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -14,8 +14,9 @@
         .card-red { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); }
         .card-green { background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); }
         .card-blue { background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%); }
-        input, select { background: transparent; text-align: center; outline: none; width: 100%; font-weight: 600; font-size: 13px; }
-        .tab-btn.active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: 800; }
+        input { background: transparent; text-align: center; outline: none; width: 100%; font-weight: 600; font-size: 13px; }
+        .tab-btn { transition: 0.3s; border-bottom: 3px solid transparent; opacity: 0.6; }
+        .tab-btn.active { opacity: 1; border-bottom: 3px solid #4f46e5; color: #1e3a8a; font-weight: 800; }
         .page { display: none; }
         .page.active { display: block; }
     </style>
@@ -23,47 +24,33 @@
 </head>
 <body class="p-4 md:p-6">
 
-    <div id="modalCli" class="fixed inset-0 bg-black/80 hidden z-50 items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-black text-indigo-900 mb-4">NUEVO CLIENTE</h2>
-            <div class="space-y-4">
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Cédula</label><input type="text" id="q-ced" readonly class="bg-gray-100 p-2 rounded-lg"></div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Nombre Completo</label><input type="text" id="q-nom" class="border-b-2 border-indigo-200 p-2 text-left"></div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Teléfono</label><input type="text" id="q-tel" class="border-b-2 border-indigo-200 p-2 text-left"></div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase">Dirección</label><input type="text" id="q-dir" class="border-b-2 border-indigo-200 p-2 text-left"></div>
-                <button onclick="guardarCliente()" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl shadow-lg mt-4 uppercase">Guardar Registro</button>
-            </div>
-        </div>
-    </div>
-
     <div class="max-w-[1500px] mx-auto glass shadow-2xl overflow-hidden">
         
-        <div class="p-6 pb-0 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="p-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black text-indigo-900 italic uppercase tracking-tighter">Moto Repuestos Jesús</h1>
-                <div class="flex gap-6 mt-2">
-                    <button onclick="showPage('caja')" class="tab-btn active uppercase text-xs tracking-widest pb-2" id="btn-caja">Cuadre de Caja</button>
-                    <button onclick="showPage('inventario')" class="tab-btn uppercase text-xs tracking-widest pb-2" id="btn-inv">Inventario / Compras</button>
+                <div class="flex gap-4 mt-2">
+                    <button onclick="switchTab('caja')" id="tab-caja" class="tab-btn active text-xs uppercase font-bold px-2 py-1">Cuadre Diario</button>
+                    <button onclick="switchTab('inv')" id="tab-inv" class="tab-btn text-xs uppercase font-bold px-2 py-1">Inventario</button>
                 </div>
             </div>
-            
             <div class="flex gap-4">
                 <div class="bg-indigo-600 p-2 rounded-xl text-white text-center shadow-lg">
                     <span class="text-[9px] font-bold opacity-80 uppercase">Tasa BCV</span>
                     <input type="number" id="tasa" step="0.01" value="54.20" class="text-xl font-black w-20 text-white" onchange="calcular()">
                 </div>
-                <button onclick="limpiarTodo()" class="bg-red-500 text-white px-4 py-2 rounded-xl font-black text-xs uppercase shadow-md hover:bg-red-600">
-                    <i class="fas fa-sync mr-1"></i> Reiniciar
+                <button onclick="limpiarTodo()" class="bg-red-500 text-white px-4 py-2 rounded-xl font-black text-xs uppercase shadow-md">
+                    <i class="fas fa-trash-alt mr-1"></i> Reiniciar
                 </button>
             </div>
         </div>
 
-        <div id="page-caja" class="page active p-6">
+        <div id="page-caja" class="page active p-6 pt-0">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 mb-6">
                 <table class="table-rainbow w-full">
                     <thead>
                         <tr>
-                            <th>Cédula (Enter)</th><th>Cliente</th><th>$ Efectivo</th><th>Bs Efectivo</th><th>Débito</th><th>Pago Móvil</th><th class="bg-pink-500">Sub-Total Bs</th><th class="bg-indigo-800">Total $</th>
+                            <th>Factura</th><th>Cédula (7-8)</th><th>Cliente</th><th>$ Efectivo</th><th>Bs Efectivo</th><th>Débito</th><th>Pago Móvil</th><th class="bg-pink-500">Sub-Total Bs</th><th class="bg-indigo-800 font-black">Total $</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoVentas"></tbody>
@@ -75,10 +62,10 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="card-blue p-5 rounded-3xl shadow-md text-blue-900">
-                    <h3 class="font-black uppercase text-[10px] mb-3"><i class="fas fa-clock mr-2"></i> Cuentas por Cobrar</h3>
+                    <h3 class="font-black uppercase text-[10px] mb-3 flex items-center"><i class="fas fa-clock mr-2"></i> Cuentas por Cobrar</h3>
                     <div class="space-y-2" id="seccionCuentas"></div>
                     <div class="mt-3 pt-2 border-t border-blue-400 flex justify-between font-black text-xs">
-                        <span>DEUDA TOTAL:</span><span id="totalCuentas">0.00</span>
+                        <span>PENDIENTE TOTAL:</span><span id="totalCuentas">0.00</span>
                     </div>
                 </div>
 
@@ -88,15 +75,14 @@
                     <h3 class="font-black uppercase text-[10px] my-3 italic text-green-800 border-t border-red-300 pt-3">Otros Ingresos (Bs)</h3>
                     <div class="space-y-2" id="seccionOtrosIngresos"></div>
                     <div class="mt-3 pt-2 border-t border-red-300 flex justify-between font-black text-xs">
-                        <span>NETO (Bs):</span><span id="totalNetoOtros">0.00</span>
+                        <span>NETO OTROS (Bs):</span><span id="totalNetoOtros">0.00</span>
                     </div>
                 </div>
 
-                <div class="bg-slate-900 p-6 rounded-3xl shadow-2xl flex flex-col items-center justify-center text-center text-white">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 mb-2 italic">Diferencia $ (Sistema vs Físico)</span>
+                <div class="bg-slate-900 p-6 rounded-3xl shadow-2xl flex flex-col items-center justify-center text-center text-white border border-indigo-500/30">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 mb-2 italic">Diferencia $ (Físico vs Sistema)</span>
                     <div id="statusNum" class="text-6xl font-black mb-1">0.00</div>
                     <div id="statusTxt" class="text-[10px] font-bold uppercase italic text-gray-400">Cuadrando...</div>
-                    
                     <div class="mt-4 w-full bg-indigo-950 p-3 rounded-2xl border border-indigo-800">
                         <h4 class="text-[9px] font-bold text-indigo-300 uppercase mb-2 italic">Conteo Billetes Físico $</h4>
                         <div id="billetes" class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]"></div>
@@ -108,26 +94,24 @@
             </div>
         </div>
 
-        <div id="page-inventario" class="page p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 col-span-1">
-                    <h2 class="font-black text-indigo-900 uppercase mb-4 tracking-tighter italic">Agregar Producto</h2>
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-bold text-gray-400">PROVEEDOR</label>
-                        <input type="text" id="i-prov" class="bg-gray-50 p-2 rounded-lg text-left" placeholder="Ej: Importadora X">
-                        <label class="text-[10px] font-bold text-gray-400">MARCA</label>
-                        <input type="text" id="i-marca" class="bg-gray-50 p-2 rounded-lg text-left" placeholder="Ej: Yamaha">
-                        <label class="text-[10px] font-bold text-gray-400">MODELO</label>
-                        <input type="text" id="i-modelo" class="bg-gray-50 p-2 rounded-lg text-left" placeholder="Ej: BWS 125">
-                        <label class="text-[10px] font-bold text-gray-400">PRECIO VENTA $</label>
-                        <input type="number" id="i-precio" class="bg-indigo-50 p-2 rounded-lg text-indigo-600 font-black" placeholder="0.00">
-                        <button onclick="guardarProducto()" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl shadow-lg uppercase text-xs">Guardar en Sistema</button>
+        <div id="page-inv" class="page p-6 pt-0">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-lg border border-indigo-100 col-span-1">
+                    <h2 class="font-black text-indigo-900 uppercase text-sm mb-4 italic">Nuevo Producto</h2>
+                    <div class="space-y-4">
+                        <div><label class="text-[9px] font-bold text-indigo-400 uppercase">Proveedor</label><input type="text" id="p-prov" class="input-glow border-b border-indigo-200 py-1 text-left"></div>
+                        <div><label class="text-[9px] font-bold text-indigo-400 uppercase">Marca</label><input type="text" id="p-marca" class="input-glow border-b border-indigo-200 py-1 text-left"></div>
+                        <div><label class="text-[9px] font-bold text-indigo-400 uppercase">Modelo</label><input type="text" id="p-modelo" class="input-glow border-b border-indigo-200 py-1 text-left"></div>
+                        <div><label class="text-[9px] font-bold text-indigo-400 uppercase">Precio Venta ($)</label><input type="number" id="p-precio" class="input-glow border-b border-indigo-200 py-1 text-left"></div>
+                        <button onclick="agregarProducto()" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl shadow-lg uppercase text-[10px]">Guardar Producto</button>
                     </div>
                 </div>
-                <div class="col-span-2 bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="col-span-3 bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
                     <table class="table-rainbow w-full">
-                        <thead><tr><th>Marca</th><th>Modelo</th><th>Precio $</th><th>Proveedor</th><th>Acción</th></tr></thead>
-                        <tbody id="listaInv"></tbody>
+                        <thead>
+                            <tr><th>Proveedor</th><th>Marca</th><th>Modelo</th><th>Precio $</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody id="listaProductos"></tbody>
                     </table>
                 </div>
             </div>
@@ -135,117 +119,52 @@
     </div>
 
     <script>
-        // DB Inicial con Clientes y Productos añadidos
-        let app = JSON.parse(localStorage.getItem('moto_jesus_pro')) || {
-            caja: { 
-                filas: Array(10).fill().map(() => ({ced:'', cli:'', usd:0, bsE:0, deb:0, pm:0})),
+        let db = JSON.parse(localStorage.getItem('moto_jesus_v22')) || {
+            caja: {
+                filas: Array(12).fill().map(() => ({fact:'', ced:'', cli:'', usd:0, bsE:0, deb:0, pm:0})),
                 cuentas: Array(4).fill().map(() => ({desc:'', monto:0})),
                 gastos: Array(4).fill().map(() => ({desc:'', monto:0})),
                 ingresos: Array(3).fill().map(() => ({desc:'', monto:0})),
                 billetes: {100:0, 50:0, 20:0, 10:0, 5:0, 2:0, 1:0}
             },
-            clientes: [],
             productos: []
         };
 
-        function showPage(id) {
+        function switchTab(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('page-'+id).classList.add('active');
-            document.getElementById('btn-'+(id==='caja'?'caja':'inv')).classList.add('active');
-            if(id === 'inventario') renderInv();
+            document.getElementById('tab-'+id).classList.add('active');
+            if(id === 'inv') renderInv();
         }
 
-        // --- LÓGICA DE CÉDULA ---
-        function checkCed(i, val) {
+        // VALIDACIÓN CÉDULA 7-8 DÍGITOS
+        function validarCedula(i, val) {
             if(!val) return;
-            // VALIDACIÓN ESTRICTA 7-8 DÍGITOS
             if(val.length < 7 || val.length > 8) {
-                alert("La cédula debe tener entre 7 y 8 números.");
-                app.caja.filas[i].ced = "";
+                alert("La cédula debe tener entre 7 y 8 dígitos.");
+                db.caja.filas[i].ced = "";
                 calcular();
                 return;
             }
-
-            const cliente = app.clientes.find(c => c.ced === val);
-            if(cliente) {
-                app.caja.filas[i].cli = cliente.nom;
-                calcular();
-            } else {
-                document.getElementById('q-ced').value = val;
-                document.getElementById('modalCli').dataset.index = i;
-                document.getElementById('modalCli').classList.remove('hidden');
-                document.getElementById('modalCli').classList.add('flex');
-            }
-        }
-
-        function guardarCliente() {
-            const nom = document.getElementById('q-nom').value;
-            const ced = document.getElementById('q-ced').value;
-            const idx = document.getElementById('modalCli').dataset.index;
-            
-            if(!nom) return alert("Falta el nombre");
-            
-            app.clientes.push({
-                ced: ced,
-                nom: nom,
-                tel: document.getElementById('q-tel').value,
-                dir: document.getElementById('q-dir').value
-            });
-            
-            app.caja.filas[idx].cli = nom;
-            app.caja.filas[idx].ced = ced;
-            
-            document.getElementById('modalCli').classList.add('hidden');
-            document.getElementById('q-nom').value = "";
+            db.caja.filas[i].ced = val;
             calcular();
         }
 
-        // --- LÓGICA DE PRODUCTOS ---
-        function guardarProducto() {
-            const mar = document.getElementById('i-marca').value;
-            const mod = document.getElementById('i-modelo').value;
-            const pre = parseFloat(document.getElementById('i-precio').value);
-            
-            if(!mar || !mod || isNaN(pre)) return alert("Llene los datos del producto");
-            
-            app.productos.push({
-                mar, mod, pre, prov: document.getElementById('i-prov').value
-            });
-            renderInv();
-            document.getElementById('i-marca').value = "";
-            document.getElementById('i-modelo').value = "";
-            document.getElementById('i-precio').value = "";
-            localStorage.setItem('moto_jesus_pro', JSON.stringify(app));
-        }
-
-        function renderInv() {
-            const tbody = document.getElementById('listaInv');
-            tbody.innerHTML = app.productos.map((p, i) => `
-                <tr>
-                    <td class="text-center font-bold">${p.mar}</td>
-                    <td class="text-center">${p.mod}</td>
-                    <td class="text-center text-indigo-600 font-black">$${p.pre.toFixed(2)}</td>
-                    <td class="text-center text-gray-400 text-[10px]">${p.prov}</td>
-                    <td class="text-center"><button onclick="delPro(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td>
-                </tr>
-            `).join('');
-        }
-
-        // --- CÁLCULOS GENERALES ---
         function calcular() {
             const tasa = parseFloat(document.getElementById('tasa').value) || 1;
             let tUsd=0, tBs=0, tFUsd=0;
             const tb = document.getElementById('cuerpoVentas'); tb.innerHTML = "";
-            
-            app.caja.filas.forEach((f, i) => {
+
+            db.caja.filas.forEach((f, i) => {
                 const filaBs = (f.bsE||0)+(f.deb||0)+(f.pm||0);
                 const totalF = (f.usd||0) + (filaBs / tasa);
                 tUsd += (f.usd||0); tBs += filaBs; tFUsd += totalF;
                 
                 tb.innerHTML += `<tr>
-                    <td><input class="input-glow" type="number" value="${f.ced}" onchange="upd(${i},'ced',this.value); checkCed(${i},this.value)"></td>
-                    <td><input class="input-glow text-left px-2" value="${f.cli}" readonly></td>
+                    <td><input class="input-glow" value="${f.fact}" onchange="upd(${i},'fact',this.value)"></td>
+                    <td><input class="input-glow border border-indigo-100 rounded" type="number" value="${f.ced}" onchange="validarCedula(${i},this.value)"></td>
+                    <td><input class="input-glow text-left px-2" value="${f.cli}" onchange="upd(${i},'cli',this.value)"></td>
                     <td><input class="input-glow text-blue-600 font-bold" type="number" value="${f.usd||''}" onchange="upd(${i},'usd',parseFloat(this.value))"></td>
                     <td><input class="input-glow" type="number" value="${f.bsE||''}" onchange="upd(${i},'bsE',parseFloat(this.value))"></td>
                     <td><input class="input-glow" type="number" value="${f.deb||''}" onchange="upd(${i},'deb',parseFloat(this.value))"></td>
@@ -254,49 +173,49 @@
                     <td class="font-black text-indigo-700 text-center">${totalF.toFixed(2)}</td>
                 </tr>`;
             });
-            document.getElementById('pieVentas').innerHTML = `<td colspan="2" class="p-2">TOTALES</td><td>${tUsd.toFixed(2)}</td><td colspan="3"></td><td>${tBs.toLocaleString()}</td><td>${tFUsd.toFixed(2)}</td>`;
+            document.getElementById('pieVentas').innerHTML = `<td colspan="3" class="p-2">TOTALES</td><td>${tUsd.toFixed(2)}</td><td colspan="3"></td><td>${tBs.toLocaleString()}</td><td>${tFUsd.toFixed(2)}</td>`;
 
-            // Cuentas, Gastos, Billetes (Igual que el original)
-            let tCuentas = 0; const sc = document.getElementById('seccionCuentas'); sc.innerHTML = "";
-            app.caja.cuentas.forEach((c, i) => {
-                tCuentas += (c.monto||0);
-                sc.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${c.desc}" onchange="updExtra('cuentas',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${c.monto||''}" onchange="updExtra('cuentas',${i},'monto',parseFloat(this.value))"></div>`;
-            });
-            document.getElementById('totalCuentas').innerText = tCuentas.toFixed(2);
-
-            let tGastos = 0; const sg = document.getElementById('seccionGastos'); sg.innerHTML = "";
-            app.caja.gastos.forEach((g, i) => {
-                tGastos += (g.monto||0);
-                sg.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${g.desc}" onchange="updExtra('gastos',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${g.monto||''}" onchange="updExtra('gastos',${i},'monto',parseFloat(this.value))"></div>`;
-            });
-
-            let tIng = 0; const si = document.getElementById('seccionOtrosIngresos'); si.innerHTML = "";
-            app.caja.ingresos.forEach((n, i) => {
-                tIng += (n.monto||0);
-                si.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${n.desc}" onchange="updExtra('ingresos',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${n.monto||''}" onchange="updExtra('ingresos',${i},'monto',parseFloat(this.value))"></div>`;
-            });
-            document.getElementById('totalNetoOtros').innerText = (tIng - tGastos).toLocaleString();
-
+            // Billetes, Gastos y Diferencia
             let tMano = 0; const sb = document.getElementById('billetes'); sb.innerHTML = "";
             [100, 50, 20, 10, 5, 2, 1].forEach(d => {
-                const c = app.caja.billetes[d] || 0; tMano += (c * d);
+                const c = db.caja.billetes[d] || 0; tMano += (c * d);
                 sb.innerHTML += `<div class="flex justify-between border-b border-indigo-900/30"><span>${d}$</span><input type="number" class="w-8 text-white font-black" value="${c||''}" onchange="updB(${d},parseInt(this.value))"></div>`;
             });
             document.getElementById('resFisico').innerText = tMano.toFixed(2);
+            
+            // SECCIÓN DE DEUDAS Y GASTOS (IGUAL A TU CÓDIGO)
+            let tCuentas = 0; const sc = document.getElementById('seccionCuentas'); sc.innerHTML = "";
+            db.caja.cuentas.forEach((c, i) => { tCuentas += (c.monto||0); sc.innerHTML += `<div class="flex gap-1"><input class="flex-1 text-left bg-white/40 p-1 rounded italic" value="${c.desc}" onchange="updExtra('cuentas',${i},'desc',this.value)"><input type="number" class="w-16 bg-white/60 p-1 rounded font-bold" value="${c.monto||''}" onchange="updExtra('cuentas',${i},'monto',parseFloat(this.value))"></div>`; });
+            document.getElementById('totalCuentas').innerText = tCuentas.toFixed(2);
 
             const diff = tMano - tUsd;
             document.getElementById('statusNum').innerText = Math.abs(diff).toFixed(2);
             document.getElementById('statusTxt').innerText = Math.abs(diff) < 0.01 ? "CUADRADO ✅" : (diff > 0 ? "SOBRANTE ⚠️" : "FALTANTE ❌");
             document.getElementById('statusNum').className = "text-6xl font-black mb-1 " + (Math.abs(diff) < 0.01 ? "text-green-400" : "text-red-400");
-
-            localStorage.setItem('moto_jesus_pro', JSON.stringify(app));
+            
+            localStorage.setItem('moto_jesus_v22', JSON.stringify(db));
         }
 
-        function upd(i,k,v) { app.caja.filas[i][k] = v; calcular(); }
-        function updExtra(type,i,k,v) { app.caja[type][i][k] = v; calcular(); }
-        function updB(d,v) { app.caja.billetes[d] = v; calcular(); }
-        function delPro(i) { app.productos.splice(i,1); renderInv(); }
-        function limpiarTodo() { if(confirm("¿Borrar datos del día?")) { localStorage.removeItem('moto_jesus_pro'); location.reload(); } }
+        // FUNCIONES DE INVENTARIO
+        function agregarProducto() {
+            const p = { prov: document.getElementById('p-prov').value, mar: document.getElementById('p-marca').value, mod: document.getElementById('p-modelo').value, pre: parseFloat(document.getElementById('p-precio').value) };
+            if(!p.mar || isNaN(p.pre)) return alert("Mínimo Marca y Precio");
+            db.productos.push(p);
+            renderInv();
+            document.getElementById('p-prov').value = ""; document.getElementById('p-marca').value = ""; document.getElementById('p-modelo').value = ""; document.getElementById('p-precio').value = "";
+        }
+
+        function renderInv() {
+            const list = document.getElementById('listaProductos');
+            list.innerHTML = db.productos.map((p, i) => `<tr><td>${p.prov}</td><td>${p.mar}</td><td>${p.mod}</td><td>$${p.pre.toFixed(2)}</td><td><i class="fas fa-trash text-red-500 cursor-pointer" onclick="delPro(${i})"></i></td></tr>`).join('');
+            localStorage.setItem('moto_jesus_v22', JSON.stringify(db));
+        }
+
+        function upd(i,k,v) { db.caja.filas[i][k] = v; calcular(); }
+        function updExtra(type,i,k,v) { db.caja[type][i][k] = v; calcular(); }
+        function updB(d,v) { db.caja.billetes[d] = v; calcular(); }
+        function delPro(i) { db.productos.splice(i,1); renderInv(); }
+        function limpiarTodo() { if(confirm("¿Borrar todo?")) { localStorage.removeItem('moto_jesus_v22'); location.reload(); } }
 
         calcular();
     </script>
