@@ -2,44 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA POS v24 - MOTO REPUESTOS JESÚS</title>
+    <title>SISTEMA POS v26 - MOTO REPUESTOS JESÚS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; 
-            --success: #10b981; --text: #f1f5f9; --muted: #94a3b8;
-        }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f1f5f9; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-
-        /* Sidebar Estilo Imagen 2 */
+        
         .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo { padding: 30px 20px; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-align: center; font-style: italic; }
-        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
+        .nav-btn { padding: 16px 25px; color: #94a3b8; cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; }
         .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
 
-        .main { flex: 1; padding: 25px; overflow-y: auto; background: radial-gradient(circle at top right, #1e293b, #0f172a); }
+        .main { flex: 1; padding: 25px; overflow-y: auto; background: #f3f4f6; }
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Estilos de Ventas/Inventario (Oscuros) */
-        .card-dark { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 20px; }
-        .input-dark { background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; padding: 10px; width: 100%; }
-
-        /* EL CUADRO DE MOTO REPUESTOS JESÚS (Estilo Imagen 3 - Blanco) */
-        .glass-jesus { background: rgba(255, 255, 255, 0.95); border-radius: 2.5rem; padding: 30px; color: #1e293b; }
+        /* TABLA CUADRE (IMAGEN 3) */
+        .glass-jesus { background: white; border-radius: 2.5rem; padding: 30px; color: #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .table-rainbow th { background: linear-gradient(90deg, #4f46e5, #ec4899); color: white; padding: 10px; font-size: 10px; text-transform: uppercase; }
-        .table-jesus td { padding: 6px; border-bottom: 1px solid #f1f5f9; }
-        .input-jesus { background: transparent; text-align: center; font-weight: 700; color: #1e3a8a; outline: none; width: 100%; }
-        .card-blue-j { background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%); color: #075985; border-radius: 1.5rem; padding: 15px; }
-        .card-red-j { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color: #991b1b; border-radius: 1.5rem; padding: 15px; }
+        .input-j { background: transparent; text-align: center; font-weight: 700; width: 100%; outline: none; border-bottom: 1px solid #eee; }
+        
+        /* CUADRO EXCEL BS (IMAGEN 4) */
+        .excel-bs { background: white; border: 2px solid #000; color: black; }
+        .excel-bs td, .excel-bs th { border: 1px solid #ccc; padding: 4px; font-size: 13px; }
+        .bg-yellow-excel { background: #ffff00; font-weight: bold; }
+
+        /* VENTANAS MODALES */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 20px; width: 400px; border: 1px solid var(--accent); }
     </style>
 </head>
 <body>
 
+    <div id="modal-cli" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-4 text-sky-400">Nuevo Cliente</h2>
+            <input type="number" id="m-ced" class="w-full bg-slate-900 p-2 rounded mb-3" placeholder="Cédula">
+            <input type="text" id="m-nom" class="w-full bg-slate-900 p-2 rounded mb-3" placeholder="Nombre Completo">
+            <input type="text" id="m-dir" class="w-full bg-slate-900 p-2 rounded mb-3" placeholder="Dirección">
+            <div class="flex gap-2">
+                <button class="flex-1 bg-emerald-600 p-2 rounded font-bold" onclick="confirmarCli()">GUARDAR</button>
+                <button class="flex-1 bg-red-600 p-2 rounded font-bold" onclick="cerrarModal('modal-cli')">SALIR / CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="sidebar">
-        <div class="logo">MOTO JESÚS</div>
+        <div class="p-8 text-xl font-black text-sky-400 italic">MOTO JESÚS</div>
         <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-shopping-cart"></i> Ventas</button>
         <button class="nav-btn" onclick="tab('inv')"><i class="fas fa-boxes"></i> Inventario</button>
         <button class="nav-btn" onclick="tab('cuadre')"><i class="fas fa-cash-register"></i> Cuadre de Caja</button>
@@ -50,44 +60,35 @@
         <div id="tab-pos" class="page active">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="md:col-span-2">
-                    <div class="card-dark flex gap-4 items-end">
-                        <div class="w-1/4"><label class="text-xs text-muted font-bold">TASA BCV</label><input type="number" id="tasa-v" class="input-dark text-xl font-black text-sky-400" value="54.20" onchange="actualizarPreciosVenta()"></div>
-                        <div class="flex-1"><label class="text-xs text-muted font-bold">BUSCAR PRODUCTO</label><input type="text" id="search-p" class="input-dark" placeholder="Marca o Modelo..." oninput="buscarProducto()"></div>
-                    </div>
-                    <div class="card-dark h-[400px] overflow-y-auto">
-                        <table class="w-full"><thead><tr class="text-muted text-xs uppercase border-b border-slate-700"><th class="pb-2">Marca</th><th class="pb-2">Modelo</th><th class="pb-2">Precio $</th><th class="pb-2">Acción</th></tr></thead><tbody id="lista-busqueda"></tbody></table>
+                    <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                        <label class="text-xs text-slate-400 uppercase font-bold">Cédula del Cliente (Enter)</label>
+                        <input type="number" id="c-ced" class="w-full bg-slate-950 p-3 rounded-xl border border-slate-600 text-white mt-1" onkeydown="verificarCliente(event)">
+                        <div id="info-cli-v" class="hidden mt-4 p-4 bg-sky-900/30 border border-sky-500 rounded-xl">
+                            <b id="v-nom" class="block text-sky-400"></b>
+                            <small id="v-dir" class="text-slate-300"></small>
+                        </div>
                     </div>
                 </div>
-                <div class="card-dark">
-                    <label class="text-xs text-muted font-bold">CÉDULA CLIENTE (Enter)</label>
-                    <input type="number" id="c-ced" class="input-dark mb-4" onkeydown="enterCedula(event)">
-                    <div id="c-info" class="hidden p-4 bg-slate-900 rounded-xl border border-sky-500 mb-6">
-                        <span class="text-[10px] text-sky-400 font-bold uppercase block">Vinculado</span>
-                        <b id="c-nom" class="text-lg text-white"></b>
-                    </div>
-                    <div class="text-center">
-                        <span class="text-muted text-xs uppercase font-bold">Total a Procesar</span>
-                        <h1 id="total-final" class="text-6xl font-black text-sky-400 my-2">$0.00</h1>
-                        <button class="w-full bg-emerald-500 text-white font-black py-4 rounded-xl shadow-lg mt-4 hover:bg-emerald-600">PROCESAR (ENTER)</button>
-                    </div>
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg text-center">
+                    <h1 id="total-v" class="text-6xl font-black text-sky-400 mb-4">$0.00</h1>
+                    <button class="w-full bg-emerald-500 py-4 rounded-xl font-black text-white shadow-lg">PROCESAR VENTA</button>
                 </div>
             </div>
         </div>
 
         <div id="tab-inv" class="page">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card-dark">
-                    <h2 class="text-xl font-bold mb-4 italic">Nuevo Producto</h2>
-                    <div class="space-y-3">
-                        <label class="text-xs">Proveedor</label><input type="text" id="p-prov" class="input-dark">
-                        <label class="text-xs">Marca</label><input type="text" id="p-marca" class="input-dark">
-                        <label class="text-xs">Modelo</label><input type="text" id="p-modelo" class="input-dark">
-                        <label class="text-xs">Precio $</label><input type="number" id="p-precio" class="input-dark">
-                        <button class="w-full bg-sky-600 py-3 rounded-xl font-bold mt-4" onclick="guardarProducto()">GUARDAR PRODUCTO</button>
-                    </div>
+            <div class="glass-jesus">
+                <h2 class="text-2xl font-bold mb-6 text-indigo-900 uppercase italic">Registro de Inventario</h2>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                    <div><label class="text-[10px] font-bold">PROVEEDOR</label><input type="text" id="i-prov" class="input-j text-left"></div>
+                    <div><label class="text-[10px] font-bold">MARCA</label><input type="text" id="i-marca" class="input-j text-left"></div>
+                    <div><label class="text-[10px] font-bold">MODELO</label><input type="text" id="i-modelo" class="input-j text-left"></div>
+                    <div><label class="text-[10px] font-bold">PRODUCTO</label><input type="text" id="i-prod" class="input-j text-left"></div>
+                    <div><label class="text-[10px] font-bold">PRECIO ($)</label><input type="number" id="i-prec" class="input-j"></div>
                 </div>
-                <div class="md:col-span-2 card-dark">
-                    <table class="w-full text-sm"><thead><tr class="text-muted border-b border-slate-700"><th>Proveedor</th><th>Marca</th><th>Modelo</th><th>Precio $</th></tr></thead><tbody id="lista-inv"></tbody></table>
+                <div class="flex gap-4">
+                    <button class="bg-indigo-600 text-white px-6 py-2 rounded-full font-bold shadow-lg" onclick="saveInv()">GUARDAR PRODUCTO</button>
+                    <button class="bg-gray-400 text-white px-6 py-2 rounded-full font-bold shadow-lg" onclick="limpiarInv()">LIMPIAR / SALIR</button>
                 </div>
             </div>
         </div>
@@ -95,43 +96,57 @@
         <div id="tab-cuadre" class="page">
             <div class="glass-jesus">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-black text-indigo-900 italic uppercase">Moto Repuestos Jesús</h1>
+                    <h1 class="text-3xl font-black text-indigo-900 italic uppercase italic">Moto Repuestos Jesús</h1>
                     <div class="bg-indigo-600 px-4 py-1 rounded-xl text-white text-center">
                         <span class="text-[9px] font-bold block opacity-70">TASA BCV</span>
-                        <input type="number" id="tasa-j" value="54.20" class="bg-transparent text-xl font-black w-16 text-center outline-none" onchange="calcularJ()">
+                        <input type="number" id="tasa-j" value="54.20" class="bg-transparent text-xl font-black w-16 text-center outline-none" onchange="renderCaja()">
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 mb-6">
-                    <table class="table-rainbow w-full table-jesus">
-                        <thead><tr><th>Factura</th><th>Cliente</th><th>$ Efectivo</th><th>Bs Efectivo</th><th>Débito</th><th>Pago Móvil</th><th class="bg-pink-500">Sub-Total Bs</th><th class="bg-indigo-900">Total $</th></tr></thead>
-                        <tbody id="cuerpo-j"></tbody>
+                <div class="overflow-hidden rounded-3xl border border-gray-100 mb-8 shadow-sm">
+                    <table class="w-full text-sm">
+                        <thead class="table-rainbow">
+                            <tr><th>Factura</th><th>Cliente</th><th>$ Efectivo</th><th>Bs Efectivo</th><th>Débito</th><th>Pago Móvil</th><th class="bg-pink-500">Sub-Total Bs</th><th class="bg-indigo-900">Total $</th></tr>
+                        </thead>
+                        <tbody id="cuerpo-caja"></tbody>
                     </table>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="card-blue-j">
-                        <h3 class="text-[10px] font-black uppercase mb-3">Cuentas por Cobrar</h3>
-                        <div id="cuentas-j" class="space-y-2"></div>
-                    </div>
-                    <div class="card-red-j">
-                        <h3 class="text-[10px] font-black uppercase mb-2">Gastos / Egresos (Bs)</h3>
-                        <div id="gastos-j" class="space-y-1 mb-3"></div>
-                        <h3 class="text-[10px] font-black uppercase mb-2 text-green-700 border-t border-red-300 pt-2">Ingresos (Bs)</h3>
-                        <div id="ingresos-j" class="space-y-1"></div>
-                    </div>
-                    <div class="bg-slate-900 p-6 rounded-[2rem] text-center flex flex-col items-center border border-indigo-500/30">
-                        <span class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-2">Diferencia $ (Sistema vs Físico)</span>
-                        <div id="diff-monto" class="text-6xl font-black text-emerald-400">0.00</div>
-                        <div id="diff-txt" class="text-[10px] uppercase font-bold text-emerald-500 mt-1 italic">Cuadrado ✅</div>
-                        
-                        <div class="mt-4 w-full bg-slate-800 p-3 rounded-2xl border border-slate-700">
-                            <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Conteo Billetes Físico $</h4>
-                            <div id="billetes-j" class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs"></div>
-                            <div class="mt-3 pt-2 border-t border-slate-700 flex justify-between font-black text-xs">
-                                <span>TOTAL FÍSICO:</span><span id="total-fisico-j" class="text-sky-400">0.00</span>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-3xl border border-blue-100">
+                                <h3 class="text-[10px] font-black uppercase text-blue-700 mb-2 italic">Cuentas por Cobrar ($)</h3>
+                                <div id="ctas-usd" class="space-y-1"></div>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-3xl border border-red-100">
+                                <h3 class="text-[10px] font-black uppercase text-red-700 mb-2 italic">Gastos / Egresos ($)</h3>
+                                <div id="gastos-usd" class="space-y-1"></div>
                             </div>
                         </div>
+                        <div class="bg-slate-900 p-6 rounded-[2.5rem] text-white">
+                            <div class="flex justify-between items-center mb-4"><span class="text-xs font-bold text-sky-400 uppercase tracking-tighter">Diferencia Divisas $</span><div id="diff-usd" class="text-4xl font-black text-emerald-400">0.00</div></div>
+                            <div id="billetes-grid" class="grid grid-cols-2 gap-x-8 gap-y-1 text-xs"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <table class="excel-bs w-full">
+                            <thead>
+                                <tr><th colspan="2" class="py-2 uppercase font-black">Total ctas x cobrar y Gastos</th></tr>
+                                <tr><th colspan="2" class="py-1">SALDO PARA ENTREGAR</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-yellow-excel"><td>Efectivo Bs</td><td id="ef-bs" class="text-right">0,00</td></tr>
+                                <tr><td colspan="2" class="bg-gray-50 font-bold text-center">Detalle Gastos Bs</td></tr>
+                                <tbody id="filas-bs-excel"></tbody>
+                                <tr class="font-bold"><td>Total gastos Bs</td><td id="tot-g-bs" class="text-right">0,00</td></tr>
+                                <tr class="border-t-2 border-black"><td>Total Efectivo</td><td id="fin-ef-bs" class="text-right">0,00</td></tr>
+                                <tr><td>Total Gastos en Bs</td><td id="fin-g-bs" class="text-right">0,00</td></tr>
+                                <tr class="bg-gray-100 font-black"><td>Efectivo menos gastos Bs</td><td id="neto-bs" class="text-right">0,00</td></tr>
+                                <tr><td>Total entre tasa ($)</td><td id="neto-tasa" class="text-right text-blue-700 font-bold">0,00</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -139,15 +154,13 @@
     </main>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('moto_system_v24')) || {
-            inv: [], cli: [], 
-            caja: {
-                filas: Array(10).fill().map(() => ({fact:'', cli:'', usd:0, bsE:0, deb:0, pm:0})),
-                cuentas: Array(3).fill().map(() => ({nom:'', m:0})),
-                gastos: Array(3).fill().map(() => ({desc:'', m:0})),
-                ingresos: Array(3).fill().map(() => ({desc:'', m:0})),
-                billetes: {100:0, 50:0, 20:0, 10:0, 5:0, 2:0, 1:0}
-            }
+        let data = JSON.parse(localStorage.getItem('moto_db_v26')) || {
+            cli: [], inv: [],
+            caja: Array(8).fill().map(() => ({fact:'', cli:'', usd:0, bsE:0, deb:0, pm:0})),
+            usd_c: Array(3).fill().map(() => ({n:'', m:0})),
+            usd_g: Array(3).fill().map(() => ({n:'', m:0})),
+            bs_g: Array(6).fill().map(() => ({n:'', m:0})),
+            bill: {100:0, 50:0, 20:0, 10:0, 5:0, 2:0, 1:0}
         };
 
         function tab(id) {
@@ -155,82 +168,107 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
             event.currentTarget.classList.add('active');
-            if(id==='inv') renderInv();
-            if(id==='cuadre') calcularJ();
+            if(id === 'cuadre') renderCaja();
         }
 
-        // --- LÓGICA DE VENTAS Y CLIENTES ---
-        function enterCedula(e) {
+        // --- CLIENTES CON DIRECCIÓN ---
+        function verificarCliente(e) {
             if(e.key === 'Enter') {
                 let ced = e.target.value;
-                if(ced.length < 7 || ced.length > 8) return alert("Cédula de 7-8 números requerida.");
-                let c = db.cli.find(x => x.ced === ced);
-                if(c) { showCli(c); }
-                else {
-                    let n = prompt("Nombre del nuevo cliente:");
-                    if(n) { let nc = {ced, nom: n}; db.cli.push(nc); save(); showCli(nc); }
+                let c = data.cli.find(x => x.ced === ced);
+                if(c) { 
+                    mostrarCliVenta(c); 
+                } else {
+                    document.getElementById('m-ced').value = ced;
+                    document.getElementById('modal-cli').style.display = 'flex';
                 }
             }
         }
-        function showCli(c) { document.getElementById('c-info').classList.remove('hidden'); document.getElementById('c-nom').innerText = c.nom; }
-
-        // --- LÓGICA DE INVENTARIO ---
-        function guardarProducto() {
-            let p = {prov: document.getElementById('p-prov').value, marca: document.getElementById('p-marca').value, modelo: document.getElementById('p-modelo').value, precio: parseFloat(document.getElementById('p-precio').value)};
-            if(!p.marca || !p.precio) return alert("Marca y Precio son obligatorios");
-            db.inv.push(p); save(); renderInv();
+        function confirmarCli() {
+            let nc = { 
+                ced: document.getElementById('m-ced').value, 
+                nom: document.getElementById('m-nom').value, 
+                dir: document.getElementById('m-dir').value 
+            };
+            if(!nc.nom || !nc.dir) return alert("Nombre y Dirección son obligatorios");
+            data.cli.push(nc); save(); cerrarModal('modal-cli'); mostrarCliVenta(nc);
         }
-        function renderInv() {
-            document.getElementById('lista-inv').innerHTML = db.inv.map(p => `<tr class="border-b border-slate-800"><td>${p.prov}</td><td class="font-bold">${p.marca}</td><td>${p.modelo}</td><td class="text-sky-400 font-bold">$${p.precio.toFixed(2)}</td></tr>`).join('');
+        function mostrarCliVenta(c) {
+            document.getElementById('info-cli-v').classList.remove('hidden');
+            document.getElementById('v-nom').innerText = c.nom;
+            document.getElementById('v-dir').innerText = c.dir;
         }
 
-        // --- LÓGICA DEL CUADRO DE CAJA (IMAGEN 3) ---
-        function calcularJ() {
+        // --- INVENTARIO COMPLETO ---
+        function saveInv() {
+            let p = {
+                prov: document.getElementById('i-prov').value,
+                marca: document.getElementById('i-marca').value,
+                mod: document.getElementById('i-modelo').value,
+                prod: document.getElementById('i-prod').value,
+                prec: parseFloat(document.getElementById('i-prec').value)
+            };
+            if(!p.marca || !p.prec) return alert("Marca y Precio obligatorios");
+            data.inv.push(p); save(); alert("Producto Guardado"); limpiarInv();
+        }
+        function limpiarInv() { ['i-prov','i-marca','i-modelo','i-prod','i-prec'].forEach(i => document.getElementById(i).value = ''); }
+
+        // --- CUADRE CAJA (BS Y $) ---
+        function renderCaja() {
             const tasa = parseFloat(document.getElementById('tasa-j').value) || 1;
-            let sistemaUsd = 0;
-            const tbody = document.getElementById('cuerpo-j');
-            tbody.innerHTML = db.caja.filas.map((f, i) => {
+            let sistemaUsd = 0; let efBsVentas = 0;
+
+            // Tabla Ventas
+            document.getElementById('cuerpo-caja').innerHTML = data.caja.map((f, i) => {
                 const subBs = (f.bsE||0)+(f.deb||0)+(f.pm||0);
                 const totUsd = (f.usd||0)+(subBs/tasa);
-                sistemaUsd += totUsd;
-                return `<tr class="table-jesus">
-                    <td><input class="input-jesus" value="${f.fact}" onchange="updJ(${i},'fact',this.value)"></td>
-                    <td><input class="input-jesus text-left px-2" value="${f.cli}" onchange="updJ(${i},'cli',this.value)"></td>
-                    <td><input class="input-jesus text-indigo-600" type="number" value="${f.usd||''}" onchange="updJ(${i},'usd',parseFloat(this.value))"></td>
-                    <td><input class="input-jesus" type="number" value="${f.bsE||''}" onchange="updJ(${i},'bsE',parseFloat(this.value))"></td>
-                    <td><input class="input-jesus" type="number" value="${f.deb||''}" onchange="updJ(${i},'deb',parseFloat(this.value))"></td>
-                    <td><input class="input-jesus" type="number" value="${f.pm||''}" onchange="updJ(${i},'pm',parseFloat(this.value))"></td>
-                    <td class="text-center font-bold text-pink-500">${subBs.toFixed(2)}</td>
+                sistemaUsd += totUsd; efBsVentas += (f.bsE||0);
+                return `<tr>
+                    <td><input class="input-j" value="${f.fact}" onchange="updC(${i},'fact',this.value)"></td>
+                    <td><input class="input-j text-left" value="${f.cli}" onchange="updC(${i},'cli',this.value)"></td>
+                    <td><input class="input-j text-blue-600" type="number" value="${f.usd||''}" onchange="updC(${i},'usd',parseFloat(this.value))"></td>
+                    <td><input class="input-j" type="number" value="${f.bsE||''}" onchange="updC(${i},'bsE',parseFloat(this.value))"></td>
+                    <td><input class="input-j" type="number" value="${f.deb||''}" onchange="updC(${i},'deb',parseFloat(this.value))"></td>
+                    <td><input class="input-j" type="number" value="${f.pm||''}" onchange="updC(${i},'pm',parseFloat(this.value))"></td>
+                    <td class="text-center font-bold text-pink-500">${subBs.toLocaleString()}</td>
                     <td class="text-center font-black text-indigo-900">${totUsd.toFixed(2)}</td>
                 </tr>`;
             }).join('');
 
-            // Billetes e Interfaz de Cuadre
-            let fisicoUsd = 0; const bCont = document.getElementById('billetes-j'); bCont.innerHTML = "";
-            [100, 50, 20, 10, 5, 2, 1].forEach(v => {
-                const cant = db.caja.billetes[v] || 0; fisicoUsd += (cant * v);
-                bCont.innerHTML += `<div class="flex justify-between border-b border-slate-700 py-1"><span>${v}$</span><input type="number" class="bg-transparent w-8 text-right outline-none text-white font-bold" value="${cant||''}" onchange="updB(${v},parseInt(this.value))"></div>`;
-            });
-            document.getElementById('total-fisico-j').innerText = fisicoUsd.toFixed(2);
-            
-            // Cuentas, Gastos, Ingresos [cite: 2026-01-09]
-            document.getElementById('cuentas-j').innerHTML = db.caja.cuentas.map((c, i) => `<div class="flex gap-1"><input class="bg-transparent border-b border-sky-600 text-[11px] w-full" placeholder="Nombre..." value="${c.nom}" onchange="updE('cuentas',${i},'nom',this.value)"><input type="number" class="bg-sky-500/20 rounded w-16 text-center text-xs" value="${c.m||''}" onchange="updE('cuentas',${i},'m',parseFloat(this.value))"></div>`).join('');
-            document.getElementById('gastos-j').innerHTML = db.caja.gastos.map((g, i) => `<div class="flex gap-1"><input class="bg-transparent border-b border-red-400 text-[11px] w-full" placeholder="Gasto..." value="${g.desc}" onchange="updE('gastos',${i},'desc',this.value)"><input type="number" class="bg-red-500/20 rounded w-16 text-center text-xs" value="${g.m||''}" onchange="updE('gastos',${i},'m',parseFloat(this.value))"></div>`).join('');
-            document.getElementById('ingresos-j').innerHTML = db.caja.ingresos.map((n, i) => `<div class="flex gap-1"><input class="bg-transparent border-b border-green-400 text-[11px] w-full" placeholder="Ingreso..." value="${n.desc}" onchange="updE('ingresos',${i},'desc',this.value)"><input type="number" class="bg-green-500/20 rounded w-16 text-center text-xs" value="${n.m||''}" onchange="updE('ingresos',${i},'m',parseFloat(this.value))"></div>`).join('');
+            // Otros USD
+            document.getElementById('ctas-usd').innerHTML = data.usd_c.map((c, i) => `<div class="flex gap-1"><input class="input-j text-[10px] text-left" placeholder="Nombre..." value="${c.n}" onchange="updE('usd_c',${i},'n',this.value)"><input type="number" class="w-10 text-xs font-bold" value="${c.m||''}" onchange="updE('usd_c',${i},'m',parseFloat(this.value))"></div>`).join('');
+            document.getElementById('gastos-usd').innerHTML = data.usd_g.map((g, i) => `<div class="flex gap-1"><input class="input-j text-[10px] text-left" placeholder="Gasto..." value="${g.n}" onchange="updE('usd_g',${i},'n',this.value)"><input type="number" class="w-10 text-xs font-bold" value="${g.m||''}" onchange="updE('usd_g',${i},'m',parseFloat(this.value))"></div>`).join('');
 
-            const diff = fisicoUsd - sistemaUsd;
-            document.getElementById('diff-monto').innerText = Math.abs(diff).toFixed(2);
-            document.getElementById('diff-monto').className = "text-6xl font-black " + (Math.abs(diff) < 0.01 ? "text-emerald-400" : "text-red-500");
-            document.getElementById('diff-txt').innerText = Math.abs(diff) < 0.01 ? "Cuadrado ✅" : (diff > 0 ? "Sobrante ⚠️" : "Faltante ❌");
+            // Excel BS [cite: 2026-01-09]
+            let sumGBs = 0;
+            document.getElementById('filas-bs-excel').innerHTML = data.bs_g.map((g, i) => {
+                sumGBs += (g.m||0);
+                return `<tr><td><input class="w-full outline-none" value="${g.n}" onchange="updE('bs_g',${i},'n',this.value)"></td><td class="text-right"><input type="number" class="w-full text-right outline-none" value="${g.m||''}" onchange="updE('bs_g',${i},'m',parseFloat(this.value))"></td></tr>`;
+            }).join('');
+            document.getElementById('ef-bs').innerText = efBsVentas.toLocaleString();
+            document.getElementById('tot-g-bs').innerText = sumGBs.toLocaleString();
+            document.getElementById('fin-ef-bs').innerText = efBsVentas.toLocaleString();
+            document.getElementById('fin-g-bs').innerText = sumGBs.toLocaleString();
+            document.getElementById('neto-bs').innerText = (efBsVentas - sumGBs).toLocaleString();
+            document.getElementById('neto-tasa').innerText = ((efBsVentas - sumGBs)/tasa).toFixed(2);
+
+            // Billetes y Diferencia
+            let fis = 0; const grid = document.getElementById('billetes-grid'); grid.innerHTML = "";
+            [100,50,20,10,5,2,1].forEach(v => {
+                let c = data.bill[v]||0; fis += (v*c);
+                grid.innerHTML += `<div class="flex justify-between border-b border-slate-700 py-1"><span>${v}$</span><input type="number" class="bg-transparent w-8 text-right text-sky-400 font-bold" value="${c||''}" onchange="updB(${v},parseInt(this.value))"></div>`;
+            });
+            document.getElementById('diff-usd').innerText = (fis - sistemaUsd).toFixed(2);
             save();
         }
 
-        function updJ(i,k,v) { db.caja.filas[i][k] = v; calcularJ(); }
-        function updB(v,c) { db.caja.billetes[v] = c; calcularJ(); }
-        function updE(t,i,k,v) { db.caja[t][i][k] = v; calcularJ(); }
-        function save() { localStorage.setItem('moto_system_v24', JSON.stringify(db)); }
+        function updC(i,k,v) { data.caja[i][k] = v; renderCaja(); }
+        function updE(t,i,k,v) { data[t][i][k] = v; renderCaja(); }
+        function updB(v,c) { data.bill[v] = c; renderCaja(); }
+        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+        function save() { localStorage.setItem('moto_db_v26', JSON.stringify(data)); }
         
-        calcularJ();
+        renderCaja();
     </script>
 </body>
 </html>
