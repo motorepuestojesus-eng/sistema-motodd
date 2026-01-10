@@ -2,210 +2,145 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA POS v23 - MOTO REPUESTOS JESÚS</title>
+    <title>SISTEMA POS - MOTO JESÚS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; 
-            --success: #10b981; --danger: #ef4444; --text: #f1f5f9; --muted: #94a3b8;
+            --success: #10b981; --text: #f1f5f9;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-
+        body { background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Estilo Imagen 2 */
         .sidebar { width: 260px; background: var(--card); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo { padding: 30px 20px; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-align: center; font-style: italic; }
-        .nav-btn { padding: 16px 25px; color: var(--muted); cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
+        .nav-btn { padding: 16px 25px; color: #94a3b8; cursor: pointer; border: none; background: none; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
         .nav-btn.active { background: #334155; color: white; border-left: 4px solid var(--accent); }
 
-        .main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top right, #1e293b, #0f172a); }
-        .page { display: none; }
-        .page.active { display: block; }
+        .main { flex: 1; padding: 25px; overflow-y: auto; background: #f3f4f6; } /* Fondo gris claro para que resalte tu cuadro blanco */
 
-        .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; margin-bottom: 25px; }
-        input, select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; font-size: 1rem; margin-top: 5px; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: var(--muted); border-bottom: 2px solid #334155; font-size: 0.8rem; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #334155; }
-
-        .btn-action { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn-action:hover { opacity: 0.8; transform: translateY(-2px); }
-
-        /* Estilo específico para la caja física de billetes */
-        .billete-row { display: flex; justify-between; align-items: center; border-bottom: 1px solid #334155; padding: 5px 0; }
-        .billete-row span { font-weight: 800; color: var(--accent); }
-        .billete-input { width: 60px !important; padding: 5px !important; text-align: center; }
+        /* TU CÓDIGO ORIGINAL (ESTILO IMAGEN 3) */
+        .glass-jesus { background: rgba(255, 255, 255, 0.95); border-radius: 2rem; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .table-rainbow th { background: linear-gradient(90deg, #4f46e5, #ec4899); color: white; padding: 10px; font-size: 10px; text-transform: uppercase; }
+        .input-glow:focus { outline: none; background: rgba(79, 70, 229, 0.05); }
+        .card-red { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color: #991b1b; }
+        .card-blue { background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%); color: #075985; }
+        input { background: transparent; text-align: center; width: 100%; font-weight: 600; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <nav class="sidebar">
-        <div class="logo">MOTO JESÚS POS</div>
-        <button class="nav-btn active" onclick="tab('pos')"><i class="fas fa-shopping-cart"></i> Ventas</button>
+        <div class="p-8 text-xl font-black text-sky-400 italic">MOTO JESÚS POS</div>
+        <button class="nav-btn" onclick="tab('pos')"><i class="fas fa-shopping-cart"></i> Ventas</button>
         <button class="nav-btn" onclick="tab('inv')"><i class="fas fa-boxes"></i> Inventario</button>
-        <button class="nav-btn" onclick="tab('finanzas')"><i class="fas fa-wallet"></i> Finanzas / Gastos</button>
-        <button class="nav-btn" onclick="tab('caja-fisica')"><i class="fas fa-cash-register"></i> Cuadre de Caja</button>
+        <button class="nav-btn active" onclick="tab('cuadre')"><i class="fas fa-cash-register"></i> Cuadre de Caja</button>
     </nav>
 
     <main class="main">
         
-        <div id="tab-pos" class="page active">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2">
-                    <div class="card flex gap-4 items-end">
-                        <div class="w-1/4"><label>Tasa BCV</label><input type="number" id="tasa-v" value="54.20" onchange="renderCart()"></div>
-                        <div class="flex-1"><label>Buscar Producto (Marca/Modelo)</label><input type="text" id="search-p" placeholder="Escriba aquí..."></div>
-                    </div>
-                    <div class="card">
-                        <table><thead><tr><th>Marca</th><th>Modelo</th><th>Precio $</th><th>Acción</th></tr></thead><tbody id="cart-list"></tbody></table>
+        <div id="tab-cuadre" class="page block">
+            <div class="glass-jesus">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-black text-indigo-900 italic uppercase">Moto Repuestos Jesús</h1>
+                    <div class="flex gap-4">
+                        <div class="bg-indigo-600 p-2 rounded-xl text-white text-center shadow-lg">
+                            <span class="text-[9px] font-bold opacity-80 uppercase">Tasa BCV</span>
+                            <input type="number" id="tasa" step="0.01" value="54.20" class="text-xl font-black w-20 text-white outline-none" onchange="calcular()">
+                        </div>
                     </div>
                 </div>
-                <div class="card">
-                    <label>Cédula del Cliente</label>
-                    <input type="number" id="c-ced" placeholder="7-8 dígitos" onkeydown="handleCedula(event)">
-                    <div id="c-info" class="mt-4 p-4 bg-slate-900 rounded-xl border border-dashed border-sky-500 hidden">
-                        <b id="c-nombre-display" class="block text-white"></b>
-                        <small id="c-tel-display" class="text-muted"></small>
+
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 mb-6">
+                    <table class="table-rainbow w-full">
+                        <thead>
+                            <tr>
+                                <th>Factura</th><th>Cliente</th><th>$ Efectivo</th><th>Bs Efectivo</th><th>Débito</th><th>Pago Móvil</th><th class="bg-pink-500">Sub-Total Bs</th><th class="bg-indigo-800">Total $</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoVentas"></tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="card-blue p-5 rounded-3xl shadow-md">
+                        <h3 class="font-black uppercase text-[10px] mb-3 italic">Cuentas por Cobrar</h3>
+                        <div id="seccionCuentas" class="space-y-2"></div>
                     </div>
-                    <div class="mt-6">
-                        <h1 id="total-usd" class="text-5xl font-black text-center text-sky-400">$0.00</h1>
-                        <h2 id="total-bs" class="text-xl font-bold text-center text-emerald-400 mt-2">0.00 Bs</h2>
+
+                    <div class="card-red p-5 rounded-3xl shadow-md">
+                        <h3 class="font-black uppercase text-[10px] mb-3 italic">Gastos / Egresos (Bs)</h3>
+                        <div id="seccionGastos" class="space-y-2"></div>
                     </div>
-                    <button class="btn-action">FINALIZAR VENTA</button>
+
+                    <div class="bg-slate-900 p-6 rounded-3xl shadow-2xl flex flex-col items-center text-white">
+                        <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 mb-2 italic">Diferencia $ (Sistema vs Físico)</span>
+                        <div id="statusNum" class="text-6xl font-black mb-1">0.00</div>
+                        <div id="statusTxt" class="text-[10px] font-bold uppercase italic text-gray-400">Cuadrando...</div>
+                        
+                        <div class="mt-4 w-full bg-indigo-950 p-3 rounded-2xl border border-indigo-800">
+                            <h4 class="text-[9px] font-bold text-indigo-300 uppercase mb-2">Conteo Billetes Físico $</h4>
+                            <div id="billetes" class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]"></div>
+                            <div class="mt-2 pt-2 border-t border-indigo-800 flex justify-between text-xs font-black">
+                                <span>TOTAL FÍSICO:</span><span id="resFisico" class="text-indigo-300">0.00</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div id="tab-inv" class="page">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card">
-                    <h2 class="text-xl font-bold mb-4">Nuevo Producto</h2>
-                    <label>Proveedor</label><input type="text" id="in-prov">
-                    <label>Marca</label><input type="text" id="in-marca">
-                    <label>Modelo</label><input type="text" id="in-modelo">
-                    <label>Precio Venta ($)</label><input type="number" id="in-precio">
-                    <button class="btn-action" onclick="saveInv()">GUARDAR EN INVENTARIO</button>
-                </div>
-                <div class="md:col-span-2 card">
-                    <table><thead><tr><th>Proveedor</th><th>Marca</th><th>Modelo</th><th>Precio $</th></tr></thead><tbody id="inv-list"></tbody></table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-finanzas" class="page">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card">
-                    <h2 class="text-xl font-bold mb-4">Registrar Movimiento</h2>
-                    <select id="f-tipo"><option>Gasto</option><option>Ingreso Extra</option><option>Cuenta por Cobrar</option></select>
-                    <label>Descripción</label><input type="text" id="f-desc">
-                    <label>Monto ($)</label><input type="number" id="f-monto">
-                    <button class="btn-action" onclick="saveFin()">REGISTRAR</button>
-                </div>
-                <div class="card">
-                    <h2 class="text-xl font-bold mb-4">Resumen de Movimientos</h2>
-                    <table><thead><tr><th>Tipo</th><th>Descripción</th><th>Monto</th></tr></thead><tbody id="fin-list"></tbody></table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-caja-fisica" class="page">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="card">
-                    <h2 class="text-2xl font-black text-sky-400 mb-6 uppercase italic">Conteo de Billetes Físicos</h2>
-                    <div class="space-y-2">
-                        <div class="billete-row"><span>100$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="100"></div>
-                        <div class="billete-row"><span>50$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="50"></div>
-                        <div class="billete-row"><span>20$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="20"></div>
-                        <div class="billete-row"><span>10$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="10"></div>
-                        <div class="billete-row"><span>5$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="5"></div>
-                        <div class="billete-row"><span>2$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="2"></div>
-                        <div class="billete-row"><span>1$</span><input type="number" class="billete-input" onchange="calcFisico()" data-val="1"></div>
-                    </div>
-                </div>
-                <div class="flex flex-col justify-center items-center card border-2 border-sky-500">
-                    <h3 class="text-muted uppercase font-bold text-xs tracking-widest">Total Efectivo en Caja</h3>
-                    <div id="fisico-total" class="text-7xl font-black text-white">$0.00</div>
-                    <p class="mt-4 text-muted italic">Este monto debe cuadrar con tus ventas en efectivo del sistema.</p>
-                </div>
-            </div>
-        </div>
-
     </main>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('moto_db_v23')) || { inv: [], cli: [], fin: [], ventas: [] };
+        // LÓGICA DE TU CÓDIGO ORIGINAL [cite: 2026-01-09]
+        let app = JSON.parse(localStorage.getItem('moto_jesus_data')) || {
+            filas: Array(10).fill().map(() => ({fact:'', cli:'', usd:0, bsE:0, deb:0, pm:0})),
+            cuentas: Array(3).fill().map(() => ({desc:'', monto:0})),
+            gastos: Array(3).fill().map(() => ({desc:'', monto:0})),
+            billetes: {100:0, 50:0, 20:0, 10:0, 5:0, 2:0, 1:0}
+        };
 
-        function tab(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            event.currentTarget.classList.add('active');
-            if(id === 'inv') renderInv();
-            if(id === 'finanzas') renderFin();
-        }
+        function calcular() {
+            const tasa = parseFloat(document.getElementById('tasa').value) || 1;
+            let totalSistemaUsd = 0;
+            const tb = document.getElementById('cuerpoVentas'); tb.innerHTML = "";
 
-        // --- LÓGICA DE CÉDULA ---
-        function handleCedula(e) {
-            if(e.key === 'Enter') {
-                let ced = e.target.value;
-                if(ced.length < 7 || ced.length > 8) {
-                    alert("Cédula inválida. Debe tener 7 u 8 dígitos.");
-                    return;
-                }
-                let cliente = db.cli.find(c => c.ced === ced);
-                if(cliente) {
-                    showCliente(cliente);
-                } else {
-                    let nom = prompt("Cliente nuevo. Ingrese Nombre Completo:");
-                    if(nom) {
-                        let newCli = { ced, nom };
-                        db.cli.push(newCli);
-                        save();
-                        showCliente(newCli);
-                    }
-                }
-            }
-        }
-
-        function showCliente(c) {
-            document.getElementById('c-info').classList.remove('hidden');
-            document.getElementById('c-nombre-display').innerText = c.nom;
-        }
-
-        // --- LÓGICA DE INVENTARIO ---
-        function saveInv() {
-            let p = { prov: document.getElementById('in-prov').value, marca: document.getElementById('in-marca').value, modelo: document.getElementById('in-modelo').value, precio: document.getElementById('in-precio').value };
-            db.inv.push(p); save(); renderInv();
-            alert("Producto guardado");
-        }
-
-        function renderInv() {
-            document.getElementById('inv-list').innerHTML = db.inv.map(p => `<tr><td>${p.prov}</td><td>${p.marca}</td><td>${p.modelo}</td><td>$${p.precio}</td></tr>`).join('');
-        }
-
-        // --- LÓGICA DE FINANZAS ---
-        function saveFin() {
-            let f = { tipo: document.getElementById('f-tipo').value, desc: document.getElementById('f-desc').value, monto: document.getElementById('f-monto').value };
-            db.fin.push(f); save(); renderFin();
-        }
-
-        function renderFin() {
-            document.getElementById('fin-list').innerHTML = db.fin.map(f => `<tr><td>${f.tipo}</td><td>${f.desc}</td><td class="${f.tipo==='Gasto'?'text-red-400':'text-green-400'}">$${f.monto}</td></tr>`).join('');
-        }
-
-        // --- LÓGICA CUADRE DE CAJA (BILLETES) ---
-        function calcFisico() {
-            let total = 0;
-            document.querySelectorAll('.billete-input').forEach(input => {
-                let cant = parseInt(input.value) || 0;
-                let valor = parseInt(input.dataset.val);
-                total += (cant * valor);
+            app.filas.forEach((f, i) => {
+                const subBs = (f.bsE||0) + (f.deb||0) + (f.pm||0);
+                const totUsd = (f.usd||0) + (subBs / tasa);
+                totalSistemaUsd += totUsd;
+                tb.innerHTML += `<tr>
+                    <td><input value="${f.fact}" onchange="upd(${i},'fact',this.value)"></td>
+                    <td><input class="text-left px-2" value="${f.cli}" onchange="upd(${i},'cli',this.value)"></td>
+                    <td><input class="text-blue-600 font-bold" type="number" value="${f.usd||''}" onchange="upd(${i},'usd',parseFloat(this.value))"></td>
+                    <td><input type="number" value="${f.bsE||''}" onchange="upd(${i},'bsE',parseFloat(this.value))"></td>
+                    <td><input type="number" value="${f.deb||''}" onchange="upd(${i},'deb',parseFloat(this.value))"></td>
+                    <td><input type="number" value="${f.pm||''}" onchange="upd(${i},'pm',parseFloat(this.value))"></td>
+                    <td class="font-bold text-pink-600 text-center">${subBs.toFixed(2)}</td>
+                    <td class="font-black text-indigo-700 text-center">${totUsd.toFixed(2)}</td>
+                </tr>`;
             });
-            document.getElementById('fisico-total').innerText = `$${total.toFixed(2)}`;
+
+            // Conteo Billetes
+            let tMano = 0; const sb = document.getElementById('billetes'); sb.innerHTML = "";
+            [100, 50, 20, 10, 5, 2, 1].forEach(d => {
+                const c = app.billetes[d] || 0; tMano += (c * d);
+                sb.innerHTML += `<div class="flex justify-between border-b border-indigo-900/30"><span>${d}$</span><input type="number" class="w-8 text-white font-black" value="${c||''}" onchange="updB(${d},parseInt(this.value))"></div>`;
+            });
+
+            document.getElementById('resFisico').innerText = tMano.toFixed(2);
+            const diff = tMano - totalSistemaUsd;
+            document.getElementById('statusNum').innerText = Math.abs(diff).toFixed(2);
+            document.getElementById('statusNum').className = "text-6xl font-black mb-1 " + (Math.abs(diff) < 0.01 ? "text-green-400" : "text-red-400");
+            
+            localStorage.setItem('moto_jesus_data', JSON.stringify(app));
         }
 
-        function save() { localStorage.setItem('moto_db_v23', JSON.stringify(db)); }
+        function upd(i,k,v) { app.filas[i][k] = v; calcular(); }
+        function updB(d,v) { app.billetes[d] = v; calcular(); }
+        function tab(id) { /* Lógica para cambiar de pestaña */ }
+        
+        calcular();
     </script>
 </body>
 </html>
